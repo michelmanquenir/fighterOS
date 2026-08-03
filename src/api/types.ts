@@ -1,0 +1,224 @@
+// Tipos espejo de los DTOs del backend (fighteros-app).
+// Los enums son union types en minúscula porque calzan con el .name()
+// de los enums Java al serializarse a JSON.
+
+export type SexoEnum = 'M' | 'F'
+
+export type EstadoDeportivoEnum = 'activo' | 'retirado' | 'suspendido' | 'lesionado'
+
+export type NivelProgresionEnum =
+  | 'debutante'
+  | 'novato'
+  | 'intermedio'
+  | 'avanzado'
+  | 'elite_amateur'
+
+export type EstadoPeleaEnum = 'programada' | 'realizada' | 'cancelada'
+
+export type ResultadoPeleaEnum =
+  | 'victoria_a'
+  | 'victoria_b'
+  | 'empate'
+  | 'no_contest'
+  | 'cancelada'
+
+export type MetodoVictoriaEnum =
+  | 'ko'
+  | 'tko_rsc'
+  | 'decision_unanime'
+  | 'decision_dividida'
+  | 'wo'
+  | 'descalificacion'
+  | 'no_contest'
+
+export type TipoMedallaEnum = 'oro' | 'plata' | 'bronce'
+
+export type TipoMultimediaEnum = 'foto' | 'video'
+
+// ---------------------------------------------------------------------
+// Catálogos
+// ---------------------------------------------------------------------
+
+export interface RegionResponse {
+  id: number
+  nombre: string
+}
+
+export interface CategoriaPesoResponse {
+  id: string
+  nombre: string
+  sexo: SexoEnum
+  pesoMin: number
+  pesoMax: number
+}
+
+export interface GimnasioResponse {
+  id: string
+  nombre: string
+}
+
+// ---------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------
+
+export interface LoginRequest {
+  email: string
+  password: string
+}
+
+export interface RegistroBoxeadorRequest {
+  nombre: string
+  email: string
+  password: string
+  rut: string
+  fechaNacimiento: string
+  sexo: SexoEnum
+  pesoActual?: number
+  pesoHabitual?: number
+  categoriaId?: string
+  gimnasioId?: string
+  regionId?: number
+}
+
+export interface AuthResponse {
+  token: string
+  usuarioId: string
+  nombre: string
+  email: string
+}
+
+// ---------------------------------------------------------------------
+// Boxeador
+// ---------------------------------------------------------------------
+
+export interface BoxeadorPerfilResponse {
+  id: string
+  nombre: string
+  email: string
+  fotoUrl: string | null
+  rut: string
+  fechaNacimiento: string
+  edad: number
+  sexo: SexoEnum
+  pesoActual: number | null
+  pesoHabitual: number | null
+  categoriaId: string | null
+  categoriaNombre: string | null
+  gimnasioId: string | null
+  gimnasioNombre: string | null
+  entrenadorId: string | null
+  entrenadorNombre: string | null
+  regionId: number | null
+  regionNombre: string | null
+  estadoDeportivo: EstadoDeportivoEnum
+  nivelProgresion: NivelProgresionEnum
+}
+
+export interface BoxeadorResumenResponse {
+  id: string
+  nombre: string
+  fotoUrl: string | null
+  sexo: SexoEnum
+  pesoActual: number | null
+  categoriaNombre: string | null
+  gimnasioNombre: string | null
+  estadoDeportivo: EstadoDeportivoEnum
+}
+
+export interface BoxeadorUpdateRequest {
+  pesoActual?: number
+  pesoHabitual?: number
+  categoriaId?: string
+  gimnasioId?: string
+  regionId?: number
+  estadoDeportivo?: EstadoDeportivoEnum
+}
+
+export interface EstadisticasResponse {
+  peleasTotales: number
+  victorias: number
+  derrotas: number
+  empates: number
+  victoriasKo: number
+  victoriasDecision: number
+  ultimaPelea: string | null
+}
+
+export type ResultadoBoxeador = 'victoria' | 'derrota' | 'empate' | 'no_contest' | 'cancelada'
+
+export interface PeleaResumenResponse {
+  id: string
+  eventoId: string
+  eventoNombre: string
+  rivalId: string
+  rivalNombre: string
+  estado: EstadoPeleaEnum
+  resultado: ResultadoPeleaEnum | null
+  resultadoBoxeador: ResultadoBoxeador | null
+  metodoVictoria: MetodoVictoriaEnum | null
+  fecha: string | null
+}
+
+export interface MedallaResponse {
+  id: string
+  tipo: TipoMedallaEnum
+  nombre: string
+  fecha: string
+  descripcion: string | null
+}
+
+export interface CopaResponse {
+  id: string
+  nombre: string
+  fecha: string
+}
+
+export interface CampeonatoResponse {
+  id: string
+  ligaNombre: string | null
+  categoriaNombre: string | null
+  titulo: string
+  fechaObtenido: string
+  vigente: boolean
+}
+
+export interface PatrocinioResponse {
+  id: string
+  patrocinadorNombre: string
+  descripcion: string | null
+  fechaInicio: string
+  fechaFin: string | null
+}
+
+export interface MultimediaResponse {
+  id: string
+  tipo: TipoMultimediaEnum
+  url: string
+  esOficial: boolean
+}
+
+export interface PesoPactadoRequest {
+  pesoPactado: number
+}
+
+export interface PesoPactadoResponse {
+  id: string
+  pesoPactado: number
+  createdAt: string
+}
+
+export interface BoxeadorFiltros {
+  gimnasioId?: string
+  regionId?: number
+  categoriaId?: string
+  estado?: EstadoDeportivoEnum
+}
+
+// Página estilo Spring Data
+export interface Page<T> {
+  content: T[]
+  totalPages: number
+  totalElements: number
+  number: number
+  size: number
+}
