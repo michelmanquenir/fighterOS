@@ -15,6 +15,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { crear } from '../api/eventos'
 import { listarRegiones } from '../api/catalogos'
+import { extraerMensajeError } from '../api/errors'
 
 const schema = z.object({
   nombre: z.string().min(1, 'Requerido'),
@@ -40,7 +41,7 @@ export function CrearEventoPage() {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { tipo: 'velada' },
+    defaultValues: { tipo: 'velada', regionId: '' },
   })
 
   const mutation = useMutation({
@@ -140,7 +141,10 @@ export function CrearEventoPage() {
             </Grid>
             {mutation.isError && (
               <Alert severity="error">
-                No se pudo crear el evento. Verifica que tengas un gimnasio registrado.
+                {extraerMensajeError(
+                  mutation.error,
+                  'No se pudo crear el evento. Verifica que tengas un gimnasio registrado.',
+                )}
               </Alert>
             )}
             <Button type="submit" variant="contained" size="large" disabled={mutation.isPending}>

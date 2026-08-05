@@ -15,6 +15,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { registrarBoxeador } from '../api/auth'
 import { listarCategoriasPeso, listarGimnasios, listarRegiones } from '../api/catalogos'
+import { extraerMensajeError } from '../api/errors'
 import { useAuth } from '../auth/useAuth'
 
 const schema = z.object({
@@ -54,7 +55,7 @@ export function RegistroBoxeadorPage() {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { sexo: 'M' },
+    defaultValues: { sexo: 'M', categoriaId: '', gimnasioId: '', regionId: '' },
   })
 
   const mutation = useMutation({
@@ -227,7 +228,9 @@ export function RegistroBoxeadorPage() {
               </Grid>
             </Grid>
             {mutation.isError && (
-              <Alert severity="error">No se pudo completar el registro. Revisa los datos.</Alert>
+              <Alert severity="error">
+                {extraerMensajeError(mutation.error, 'No se pudo completar el registro. Revisa los datos.')}
+              </Alert>
             )}
             <Button type="submit" variant="contained" size="large" disabled={mutation.isPending}>
               {mutation.isPending ? 'Registrando...' : 'Registrarme'}
