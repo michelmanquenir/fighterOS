@@ -42,7 +42,7 @@ export function RegistroGimnasioPage() {
     register,
     handleSubmit,
     control,
-    formState: { errors },
+    formState: { errors, isSubmitted },
   } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { regionId: '' } })
 
   const mutation = useMutation({
@@ -76,6 +76,9 @@ export function RegistroGimnasioPage() {
             spacing={3}
             onSubmit={handleSubmit((values) => mutation.mutate(values))}
           >
+            {isSubmitted && Object.keys(errors).length > 0 && (
+              <Alert severity="warning">Revisa los campos marcados en rojo antes de continuar.</Alert>
+            )}
             <Stack spacing={2}>
               <Typography variant="h5">Tu cuenta</Typography>
               <TextField
