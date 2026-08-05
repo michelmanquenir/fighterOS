@@ -12,6 +12,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       usuarioId: response.usuarioId,
       nombre: response.nombre,
       email: response.email,
+      roles: response.roles,
     }
     setStoredAuth(stored)
     setAuth(stored)

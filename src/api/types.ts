@@ -35,6 +35,15 @@ export type TipoMedallaEnum = 'oro' | 'plata' | 'bronce'
 
 export type TipoMultimediaEnum = 'foto' | 'video'
 
+export type TipoEventoEnum = 'torneo' | 'velada' | 'exhibicion' | 'campeonato'
+
+export type EstadoEventoEnum =
+  | 'planificado'
+  | 'inscripciones_abiertas'
+  | 'en_curso'
+  | 'finalizado'
+  | 'cancelado'
+
 // ---------------------------------------------------------------------
 // Catálogos
 // ---------------------------------------------------------------------
@@ -80,11 +89,31 @@ export interface RegistroBoxeadorRequest {
   regionId?: number
 }
 
+export interface RegistroUsuarioRequest {
+  nombre: string
+  email: string
+  password: string
+  regionId?: number
+}
+
+export interface RegistroGimnasioRequest {
+  nombreAdmin: string
+  email: string
+  password: string
+  nombreGimnasio: string
+  direccion?: string
+  regionId?: number
+  telefono?: string
+  emailGimnasio?: string
+  descripcion?: string
+}
+
 export interface AuthResponse {
   token: string
   usuarioId: string
   nombre: string
   email: string
+  roles: string[]
 }
 
 // ---------------------------------------------------------------------
@@ -221,4 +250,53 @@ export interface Page<T> {
   totalElements: number
   number: number
   size: number
+}
+
+// ---------------------------------------------------------------------
+// Eventos
+// ---------------------------------------------------------------------
+
+export interface EventoResponse {
+  id: string
+  nombre: string
+  tipo: TipoEventoEnum
+  fecha: string
+  lugar: string | null
+  regionId: number | null
+  regionNombre: string | null
+  cuposTotales: number | null
+  estado: EstadoEventoEnum
+  afichePosterUrl: string | null
+  reglamentoUrl: string | null
+  organizadorId: string
+  organizadorNombre: string
+  gimnasioNombre: string | null
+}
+
+export interface EventoCreateRequest {
+  nombre: string
+  tipo: TipoEventoEnum
+  fecha: string
+  lugar?: string
+  regionId?: number
+  cuposTotales?: number
+  reglamentoUrl?: string
+  afichePosterUrl?: string
+}
+
+export interface EventoUpdateRequest {
+  nombre?: string
+  fecha?: string
+  lugar?: string
+  regionId?: number
+  cuposTotales?: number
+  estado?: EstadoEventoEnum
+  reglamentoUrl?: string
+  afichePosterUrl?: string
+}
+
+export interface EventoFiltros {
+  regionId?: number
+  tipo?: TipoEventoEnum
+  estado?: EstadoEventoEnum
 }

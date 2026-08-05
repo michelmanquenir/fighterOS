@@ -3,6 +3,7 @@ export interface StoredAuth {
   usuarioId: string
   nombre: string
   email: string
+  roles: string[]
 }
 
 const STORAGE_KEY = 'fighteros_auth'

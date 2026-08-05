@@ -5,6 +5,7 @@ import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import { Link as RouterLink, Outlet, useNavigate } from 'react-router-dom'
+import { hasRole } from '../auth/roles'
 import { useAuth } from '../auth/useAuth'
 
 export function AppShell() {
@@ -23,19 +24,29 @@ export function AppShell() {
           <Typography
             variant="h5"
             component={RouterLink}
-            to="/boxeadores"
+            to="/"
             sx={{ flexGrow: 1, textDecoration: 'none', color: 'text.primary' }}
           >
             FighterOS
           </Typography>
+          <Button component={RouterLink} to="/" color="inherit">
+            Eventos
+          </Button>
           <Button component={RouterLink} to="/boxeadores" color="inherit">
             Boxeadores
           </Button>
+          {hasRole(auth, 'gimnasio_admin') && (
+            <Button component={RouterLink} to="/eventos/mios" color="inherit">
+              Mis eventos
+            </Button>
+          )}
           {auth ? (
             <>
-              <Button component={RouterLink} to={`/boxeadores/${auth.usuarioId}`} color="inherit">
-                Mi perfil
-              </Button>
+              {hasRole(auth, 'boxeador') && (
+                <Button component={RouterLink} to={`/boxeadores/${auth.usuarioId}`} color="inherit">
+                  Mi perfil
+                </Button>
+              )}
               <Button onClick={handleLogout} variant="outlined" color="primary">
                 Salir
               </Button>
