@@ -59,6 +59,7 @@ export function RegistroBoxeadorPage() {
   })
 
   function enfocarPrimerError(fieldErrors: typeof errors) {
+    console.log('[RegistroBoxeador] validación falló, errores:', fieldErrors)
     const primerCampo = Object.keys(fieldErrors)[0]
     if (!primerCampo) return
     const el = document.querySelector<HTMLElement>(`[name="${primerCampo}"]`)
@@ -67,8 +68,8 @@ export function RegistroBoxeadorPage() {
   }
 
   const mutation = useMutation({
-    mutationFn: (values: FormValues) =>
-      registrarBoxeador({
+    mutationFn: (values: FormValues) => {
+      const payload = {
         nombre: values.nombre,
         email: values.email,
         password: values.password,
@@ -80,10 +81,17 @@ export function RegistroBoxeadorPage() {
         categoriaId: values.categoriaId || undefined,
         gimnasioId: values.gimnasioId || undefined,
         regionId: values.regionId ? Number(values.regionId) : undefined,
-      }),
+      }
+      console.log('[RegistroBoxeador] validación OK, llamando a registrarBoxeador con:', payload)
+      return registrarBoxeador(payload)
+    },
     onSuccess: (response) => {
+      console.log('[RegistroBoxeador] registro exitoso:', response)
       login(response)
       navigate(`/boxeadores/${response.usuarioId}`)
+    },
+    onError: (error) => {
+      console.error('[RegistroBoxeador] error en la llamada:', error)
     },
   })
 
@@ -97,7 +105,10 @@ export function RegistroBoxeadorPage() {
           <Stack
             component="form"
             spacing={3}
-            onSubmit={handleSubmit((values) => mutation.mutate(values), enfocarPrimerError)}
+            onSubmit={(e) => {
+              console.log('[RegistroBoxeador] evento submit del form disparado')
+              return handleSubmit((values) => mutation.mutate(values), enfocarPrimerError)(e)
+            }}
           >
             {isSubmitted && Object.keys(errors).length > 0 && (
               <Alert severity="warning">Revisa los campos marcados en rojo antes de continuar.</Alert>
@@ -243,7 +254,13 @@ export function RegistroBoxeadorPage() {
                 {extraerMensajeError(mutation.error, 'No se pudo completar el registro. Revisa los datos.')}
               </Alert>
             )}
-            <Button type="submit" variant="contained" size="large" disabled={mutation.isPending}>
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              disabled={mutation.isPending}
+              onClick={() => console.log('[RegistroBoxeador] click en Registrarme')}
+            >
               {mutation.isPending ? 'Registrando...' : 'Registrarme'}
             </Button>
           </Stack>
