@@ -133,7 +133,7 @@ export function RegistroGimnasioPage() {
                       <TextField select fullWidth label="Región" {...field}>
                         <MenuItem value="">Sin región</MenuItem>
                         {regionesQuery.data?.map((region) => (
-                          <MenuItem key={region.id} value={region.id}>
+                          <MenuItem key={region.id} value={String(region.id)}>
                             {region.nombre}
                           </MenuItem>
                         ))}
