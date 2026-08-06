@@ -45,6 +45,14 @@ export function RegistroGimnasioPage() {
     formState: { errors, isSubmitted },
   } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { regionId: '' } })
 
+  function enfocarPrimerError(fieldErrors: typeof errors) {
+    const primerCampo = Object.keys(fieldErrors)[0]
+    if (!primerCampo) return
+    const el = document.querySelector<HTMLElement>(`[name="${primerCampo}"]`)
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    el?.focus()
+  }
+
   const mutation = useMutation({
     mutationFn: (values: FormValues) =>
       registrarGimnasio({
@@ -74,7 +82,7 @@ export function RegistroGimnasioPage() {
           <Stack
             component="form"
             spacing={3}
-            onSubmit={handleSubmit((values) => mutation.mutate(values))}
+            onSubmit={handleSubmit((values) => mutation.mutate(values), enfocarPrimerError)}
           >
             {isSubmitted && Object.keys(errors).length > 0 && (
               <Alert severity="warning">Revisa los campos marcados en rojo antes de continuar.</Alert>

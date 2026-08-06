@@ -58,6 +58,14 @@ export function RegistroBoxeadorPage() {
     defaultValues: { sexo: 'M', categoriaId: '', gimnasioId: '', regionId: '' },
   })
 
+  function enfocarPrimerError(fieldErrors: typeof errors) {
+    const primerCampo = Object.keys(fieldErrors)[0]
+    if (!primerCampo) return
+    const el = document.querySelector<HTMLElement>(`[name="${primerCampo}"]`)
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    el?.focus()
+  }
+
   const mutation = useMutation({
     mutationFn: (values: FormValues) =>
       registrarBoxeador({
@@ -89,7 +97,7 @@ export function RegistroBoxeadorPage() {
           <Stack
             component="form"
             spacing={3}
-            onSubmit={handleSubmit((values) => mutation.mutate(values))}
+            onSubmit={handleSubmit((values) => mutation.mutate(values), enfocarPrimerError)}
           >
             {isSubmitted && Object.keys(errors).length > 0 && (
               <Alert severity="warning">Revisa los campos marcados en rojo antes de continuar.</Alert>
