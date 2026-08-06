@@ -4,6 +4,7 @@ import { BoxeadorPerfilPage } from './pages/BoxeadorPerfilPage'
 import { BoxeadoresListPage } from './pages/BoxeadoresListPage'
 import { CrearEventoPage } from './pages/CrearEventoPage'
 import { EventoDetallePage } from './pages/EventoDetallePage'
+import { EventosListPage } from './pages/EventosListPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { MisEventosPage } from './pages/MisEventosPage'
@@ -17,6 +18,7 @@ function App() {
     <Routes>
       <Route element={<AppShell />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/eventos" element={<EventosListPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegistroPage />} />
         <Route path="/registro/espectador" element={<RegistroEspectadorPage />} />
