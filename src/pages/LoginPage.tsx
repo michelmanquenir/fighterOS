@@ -10,7 +10,7 @@ import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useMutation } from '@tanstack/react-query'
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom'
 import { login as loginRequest } from '../api/auth'
 import { useAuth } from '../auth/useAuth'
 
@@ -24,6 +24,8 @@ type FormValues = z.infer<typeof schema>
 export function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const sesionExpirada = searchParams.get('expirada') === '1'
   const {
     register,
     handleSubmit,
@@ -46,6 +48,9 @@ export function LoginPage() {
             Entrar
           </Typography>
           <Stack component="form" spacing={2} onSubmit={handleSubmit((values) => mutation.mutate(values))}>
+            {sesionExpirada && (
+              <Alert severity="info">Tu sesión expiró. Inicia sesión de nuevo.</Alert>
+            )}
             <TextField
               label="Email"
               type="email"
