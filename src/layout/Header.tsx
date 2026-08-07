@@ -11,9 +11,12 @@ import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
+import { useQuery } from '@tanstack/react-query'
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
+import { obtenerMe } from '../api/usuarios'
 import { hasRole } from '../auth/roles'
 import { useAuth } from '../auth/useAuth'
+import { AvatarUploadButton } from '../components/AvatarUploadButton'
 
 const NAV_LINKS = [
   { to: '/', label: 'Inicio' },
@@ -26,6 +29,11 @@ export function Header() {
   const navigate = useNavigate()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
+  const meQuery = useQuery({
+    queryKey: ['usuarios', 'me'],
+    queryFn: obtenerMe,
+    enabled: !!auth,
+  })
 
   function handleLogout() {
     logout()
@@ -98,6 +106,7 @@ export function Header() {
           <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', display: { xs: 'none', sm: 'flex' } }}>
             {auth ? (
               <>
+                <AvatarUploadButton avatarUrl={meQuery.data?.avatarUrl} nombre={auth.nombre} size={36} />
                 {hasRole(auth, 'boxeador') && (
                   <Button component={RouterLink} to={`/boxeadores/${auth.usuarioId}`} color="inherit">
                     Mi perfil
@@ -155,6 +164,10 @@ export function Header() {
 
           {auth ? (
             <>
+              <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', px: 1, py: 0.5 }}>
+                <AvatarUploadButton avatarUrl={meQuery.data?.avatarUrl} nombre={auth.nombre} size={36} />
+                <Typography variant="body2">{auth.nombre}</Typography>
+              </Stack>
               {hasRole(auth, 'boxeador') && (
                 <Button
                   onClick={() => handleNavigate(`/boxeadores/${auth.usuarioId}`)}

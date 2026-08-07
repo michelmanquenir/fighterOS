@@ -116,6 +116,14 @@ export interface AuthResponse {
   roles: string[]
 }
 
+export interface UsuarioResponse {
+  id: string
+  nombre: string
+  email: string
+  avatarUrl: string | null
+  roles: string[]
+}
+
 // ---------------------------------------------------------------------
 // Boxeador
 // ---------------------------------------------------------------------
