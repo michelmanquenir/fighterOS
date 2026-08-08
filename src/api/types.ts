@@ -240,6 +240,19 @@ export interface PesoPactadoRequest {
   pesoPactado: number
 }
 
+export type EstadoSeguimiento = 'ninguno' | 'pendiente' | 'aceptado'
+
+export interface EstadoSeguimientoResponse {
+  estado: EstadoSeguimiento
+}
+
+export interface SolicitudSeguimientoResponse {
+  seguidorId: string
+  seguidorNombre: string
+  seguidorAvatarUrl: string | null
+  fecha: string
+}
+
 export interface PesoPactadoResponse {
   id: string
   pesoPactado: number

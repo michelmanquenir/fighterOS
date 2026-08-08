@@ -1,5 +1,7 @@
+import CheckIcon from '@mui/icons-material/Check'
 import ChatIcon from '@mui/icons-material/Chat'
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter'
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
 import LockIcon from '@mui/icons-material/Lock'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1'
@@ -7,12 +9,17 @@ import PlaceIcon from '@mui/icons-material/Place'
 import SportsIcon from '@mui/icons-material/Sports'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import CircularProgress from '@mui/material/CircularProgress'
 import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
+import { dejarDeSeguir, obtenerEstado, seguir } from '../../../api/seguidores'
 import type { BoxeadorPerfilResponse, EstadoDeportivoEnum } from '../../../api/types'
+import { useAuth } from '../../../auth/useAuth'
 import { FotoUploadButton } from './FotoUploadButton'
 
 const ESTADO_CONFIG: Record<EstadoDeportivoEnum, { label: string; dot: string }> = {
@@ -27,6 +34,85 @@ interface PerfilHeroProps {
   esPropio: boolean
   pesoMax: number | null
   onEditar: () => void
+}
+
+function BotonSeguir({ boxeadorId }: { boxeadorId: string }) {
+  const { auth } = useAuth()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  const estadoQuery = useQuery({
+    queryKey: ['seguidores', boxeadorId, 'estado'],
+    queryFn: () => obtenerEstado(boxeadorId),
+    enabled: !!auth,
+  })
+  const estado = auth ? (estadoQuery.data?.estado ?? 'ninguno') : 'ninguno'
+
+  const seguirMutation = useMutation({
+    mutationFn: () => seguir(boxeadorId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['seguidores', boxeadorId, 'estado'] })
+    },
+  })
+  const dejarDeSeguirMutation = useMutation({
+    mutationFn: () => dejarDeSeguir(boxeadorId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['seguidores', boxeadorId, 'estado'] })
+    },
+  })
+
+  function handleClick() {
+    if (!auth) {
+      navigate('/login')
+      return
+    }
+    if (estado === 'ninguno') {
+      seguirMutation.mutate()
+    } else {
+      dejarDeSeguirMutation.mutate()
+    }
+  }
+
+  const cargando = estadoQuery.isLoading || seguirMutation.isPending || dejarDeSeguirMutation.isPending
+
+  if (estado === 'aceptado') {
+    return (
+      <Button
+        variant="outlined"
+        color="secondary"
+        startIcon={cargando ? <CircularProgress size={16} /> : <CheckIcon />}
+        onClick={handleClick}
+        disabled={cargando}
+        fullWidth
+      >
+        Siguiendo
+      </Button>
+    )
+  }
+  if (estado === 'pendiente') {
+    return (
+      <Button
+        variant="outlined"
+        startIcon={cargando ? <CircularProgress size={16} /> : <HourglassEmptyIcon />}
+        onClick={handleClick}
+        disabled={cargando}
+        fullWidth
+      >
+        Solicitud enviada
+      </Button>
+    )
+  }
+  return (
+    <Button
+      variant="contained"
+      startIcon={cargando ? <CircularProgress size={16} color="inherit" /> : <PersonAddAlt1Icon />}
+      onClick={handleClick}
+      disabled={cargando}
+      fullWidth
+    >
+      Seguir
+    </Button>
+  )
 }
 
 export function PerfilHero({ boxeador, esPropio, pesoMax, onEditar }: PerfilHeroProps) {
@@ -128,46 +214,32 @@ export function PerfilHero({ boxeador, esPropio, pesoMax, onEditar }: PerfilHero
           <Button variant="outlined" onClick={onEditar}>
             Editar perfil
           </Button>
-        ) : verPublico ? (
-          <>
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{ alignItems: 'center', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}
-            >
-              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: estado.dot }} />
-              <Typography variant="overline" sx={{ color: estado.dot }}>
-                {estado.label}
-              </Typography>
-            </Stack>
-            {boxeador.entrenadorNombre && (
-              <Tooltip title="Función en desarrollo">
-                <span>
-                  <Button variant="contained" startIcon={<ChatIcon />} disabled>
-                    Contactar entrenador
-                  </Button>
-                </span>
-              </Tooltip>
-            )}
-          </>
         ) : (
           <>
-            <Stack
-              direction="row"
-              spacing={0.5}
-              sx={{ alignItems: 'center', color: 'text.secondary', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}
-            >
-              <LockIcon sx={{ fontSize: 16 }} />
-              <Typography variant="overline">Perfil privado</Typography>
-            </Stack>
-            <Stack direction="row" spacing={1}>
-              <Tooltip title="Función en desarrollo">
-                <span style={{ flexGrow: 1 }}>
-                  <Button variant="contained" startIcon={<PersonAddAlt1Icon />} disabled fullWidth>
-                    Seguir
-                  </Button>
-                </span>
-              </Tooltip>
+            {verPublico ? (
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ alignItems: 'center', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}
+              >
+                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: estado.dot }} />
+                <Typography variant="overline" sx={{ color: estado.dot }}>
+                  {estado.label}
+                </Typography>
+              </Stack>
+            ) : (
+              <Stack
+                direction="row"
+                spacing={0.5}
+                sx={{ alignItems: 'center', color: 'text.secondary', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}
+              >
+                <LockIcon sx={{ fontSize: 16 }} />
+                <Typography variant="overline">Perfil privado</Typography>
+              </Stack>
+            )}
+
+            <Stack direction="row" spacing={1} sx={{ width: '100%' }}>
+              <BotonSeguir boxeadorId={boxeador.id} />
               <Tooltip title="Función en desarrollo">
                 <span>
                   <IconButton disabled sx={{ border: '1px solid', borderColor: 'divider' }}>
@@ -176,6 +248,16 @@ export function PerfilHero({ boxeador, esPropio, pesoMax, onEditar }: PerfilHero
                 </span>
               </Tooltip>
             </Stack>
+
+            {verPublico && boxeador.entrenadorNombre && (
+              <Tooltip title="Función en desarrollo">
+                <span>
+                  <Button variant="contained" startIcon={<ChatIcon />} disabled>
+                    Contactar entrenador
+                  </Button>
+                </span>
+              </Tooltip>
+            )}
           </>
         )}
       </Stack>

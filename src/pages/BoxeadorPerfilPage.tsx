@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { obtenerPerfil } from '../api/boxeadores'
 import { listarCategoriasPeso } from '../api/catalogos'
+import { obtenerEstado } from '../api/seguidores'
 import { useAuth } from '../auth/useAuth'
 import { CombatesCard } from '../features/boxeadores/components/CombatesCard'
 import { EditarPerfilDialog } from '../features/boxeadores/components/EditarPerfilDialog'
@@ -17,11 +18,14 @@ import { PalmaresResumenCard } from '../features/boxeadores/components/PalmaresR
 import { PerfilDeportivoCard } from '../features/boxeadores/components/PerfilDeportivoCard'
 import { PerfilHero } from '../features/boxeadores/components/PerfilHero'
 import { PerfilPrivadoCard } from '../features/boxeadores/components/PerfilPrivadoCard'
+import { SolicitudesSeguimientoCard } from '../features/boxeadores/components/SolicitudesSeguimientoCard'
 
 export function BoxeadorPerfilPage() {
   const { id } = useParams<{ id: string }>()
   const { auth } = useAuth()
   const [editOpen, setEditOpen] = useState(false)
+
+  const esPropio = !!auth && auth.usuarioId === id
 
   const query = useQuery({
     queryKey: ['boxeador', id],
@@ -32,6 +36,11 @@ export function BoxeadorPerfilPage() {
     queryKey: ['catalogos', 'categorias-peso'],
     queryFn: listarCategoriasPeso,
   })
+  const estadoSeguimientoQuery = useQuery({
+    queryKey: ['seguidores', id, 'estado'],
+    queryFn: () => obtenerEstado(id!),
+    enabled: !!id && !!auth && !esPropio,
+  })
 
   if (!id) return null
   if (query.isLoading) return <CircularProgress />
@@ -40,8 +49,8 @@ export function BoxeadorPerfilPage() {
   }
 
   const boxeador = query.data
-  const esPropio = auth?.usuarioId === boxeador.id
-  const verPublico = esPropio || boxeador.perfilPublico
+  const verPublico =
+    esPropio || boxeador.perfilPublico || estadoSeguimientoQuery.data?.estado === 'aceptado'
   const pesoMax = categoriasQuery.data?.find((c) => c.id === boxeador.categoriaId)?.pesoMax ?? null
 
   return (
@@ -72,6 +81,7 @@ export function BoxeadorPerfilPage() {
           </Grid>
           <Grid size={{ xs: 12, lg: 4 }}>
             <Stack spacing={3}>
+              {esPropio && <SolicitudesSeguimientoCard />}
               <PalmaresResumenCard boxeadorId={boxeador.id} esPropio={esPropio} />
               <EquipoCard entrenadorNombre={boxeador.entrenadorNombre} gimnasioNombre={boxeador.gimnasioNombre} />
             </Stack>
