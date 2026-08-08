@@ -16,7 +16,17 @@ export function AppShell() {
           <Outlet />
         </Box>
       ) : (
-        <Container component="main" maxWidth="lg" sx={{ flexGrow: 1, py: 4 }}>
+        <Container
+          component="main"
+          maxWidth={false}
+          sx={{
+            flexGrow: 1,
+            py: 4,
+            px: { xs: 2, md: 4 },
+            maxWidth: { xs: '100%', lg: 1440, xl: 1720 },
+            mx: 'auto',
+          }}
+        >
           <Outlet />
         </Container>
       )}
