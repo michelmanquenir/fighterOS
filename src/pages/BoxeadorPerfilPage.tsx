@@ -63,35 +63,37 @@ export function BoxeadorPerfilPage() {
         onEditar={() => setEditOpen(true)}
       />
 
-      <InformacionBasicaCard
-        pesoActual={boxeador.pesoActual}
-        categoriaNombre={boxeador.categoriaNombre}
-        gimnasioNombre={boxeador.gimnasioNombre}
-        regionNombre={boxeador.regionNombre}
-      />
-
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 8 }}>
-          {esPropio ? (
-            <Box>
-              <Tabs value={tab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
-                <Tab label="Estadísticas" value="estadisticas" />
-                <Tab label="Historial" value="historial" />
-                <Tab label="Próximas peleas" value="proximas" />
-                <Tab label="Palmarés" value="palmares" />
-                <Tab label="Multimedia" value="multimedia" />
-              </Tabs>
-              <Box sx={{ pt: 3 }}>
-                {tab === 'estadisticas' && <EstadisticasTab boxeadorId={boxeador.id} />}
-                {tab === 'historial' && <HistorialTab boxeadorId={boxeador.id} />}
-                {tab === 'proximas' && <ProximasPeleasTab boxeadorId={boxeador.id} />}
-                {tab === 'palmares' && <PalmaresTab boxeadorId={boxeador.id} esPropio={esPropio} />}
-                {tab === 'multimedia' && <MultimediaTab boxeadorId={boxeador.id} esPropio={esPropio} />}
+          <Stack spacing={4}>
+            <InformacionBasicaCard
+              pesoActual={boxeador.pesoActual}
+              categoriaNombre={boxeador.categoriaNombre}
+              gimnasioNombre={boxeador.gimnasioNombre}
+              regionNombre={boxeador.regionNombre}
+            />
+
+            {esPropio ? (
+              <Box>
+                <Tabs value={tab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
+                  <Tab label="Estadísticas" value="estadisticas" />
+                  <Tab label="Historial" value="historial" />
+                  <Tab label="Próximas peleas" value="proximas" />
+                  <Tab label="Palmarés" value="palmares" />
+                  <Tab label="Multimedia" value="multimedia" />
+                </Tabs>
+                <Box sx={{ pt: 3 }}>
+                  {tab === 'estadisticas' && <EstadisticasTab boxeadorId={boxeador.id} />}
+                  {tab === 'historial' && <HistorialTab boxeadorId={boxeador.id} />}
+                  {tab === 'proximas' && <ProximasPeleasTab boxeadorId={boxeador.id} />}
+                  {tab === 'palmares' && <PalmaresTab boxeadorId={boxeador.id} esPropio={esPropio} />}
+                  {tab === 'multimedia' && <MultimediaTab boxeadorId={boxeador.id} esPropio={esPropio} />}
+                </Box>
               </Box>
-            </Box>
-          ) : (
-            <PerfilPrivadoCard nombre={boxeador.nombre} />
-          )}
+            ) : (
+              <PerfilPrivadoCard nombre={boxeador.nombre} />
+            )}
+          </Stack>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
           <EquipoCard entrenadorNombre={boxeador.entrenadorNombre} gimnasioNombre={boxeador.gimnasioNombre} />
