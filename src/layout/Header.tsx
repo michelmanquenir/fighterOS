@@ -2,6 +2,7 @@ import { useState } from 'react'
 import MenuIcon from '@mui/icons-material/Menu'
 import SportsMmaIcon from '@mui/icons-material/SportsMma'
 import AppBar from '@mui/material/AppBar'
+import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Container from '@mui/material/Container'
@@ -16,7 +17,6 @@ import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import { obtenerMe } from '../api/usuarios'
 import { hasRole } from '../auth/roles'
 import { useAuth } from '../auth/useAuth'
-import { AvatarUploadButton } from '../components/AvatarUploadButton'
 
 const NAV_LINKS = [
   { to: '/', label: 'Inicio' },
@@ -106,7 +106,9 @@ export function Header() {
           <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', display: { xs: 'none', sm: 'flex' } }}>
             {auth ? (
               <>
-                <AvatarUploadButton avatarUrl={meQuery.data?.avatarUrl} nombre={auth.nombre} size={36} />
+                <Avatar src={meQuery.data?.avatarUrl ?? undefined} sx={{ width: 36, height: 36 }}>
+                  {auth.nombre.charAt(0).toUpperCase()}
+                </Avatar>
                 {hasRole(auth, 'boxeador') && (
                   <Button component={RouterLink} to={`/boxeadores/${auth.usuarioId}`} color="inherit">
                     Mi perfil
@@ -165,7 +167,9 @@ export function Header() {
           {auth ? (
             <>
               <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', px: 1, py: 0.5 }}>
-                <AvatarUploadButton avatarUrl={meQuery.data?.avatarUrl} nombre={auth.nombre} size={36} />
+                <Avatar src={meQuery.data?.avatarUrl ?? undefined} sx={{ width: 36, height: 36 }}>
+                  {auth.nombre.charAt(0).toUpperCase()}
+                </Avatar>
                 <Typography variant="body2">{auth.nombre}</Typography>
               </Stack>
               {hasRole(auth, 'boxeador') && (
