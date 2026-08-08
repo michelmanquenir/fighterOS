@@ -1,11 +1,17 @@
 import { useState } from 'react'
+import LockIcon from '@mui/icons-material/Lock'
+import PublicIcon from '@mui/icons-material/Public'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
+import Divider from '@mui/material/Divider'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import Grid from '@mui/material/Grid'
 import MenuItem from '@mui/material/MenuItem'
+import Stack from '@mui/material/Stack'
+import Switch from '@mui/material/Switch'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -28,6 +34,7 @@ export function EditarPerfilDialog({ boxeador, open, onClose }: Props) {
   const [estadoDeportivo, setEstadoDeportivo] = useState<EstadoDeportivoEnum>(
     boxeador.estadoDeportivo,
   )
+  const [perfilPublico, setPerfilPublico] = useState(boxeador.perfilPublico)
 
   const queryClient = useQueryClient()
   const regionesQuery = useQuery({ queryKey: ['catalogos', 'regiones'], queryFn: listarRegiones })
@@ -49,6 +56,7 @@ export function EditarPerfilDialog({ boxeador, open, onClose }: Props) {
         gimnasioId: gimnasioId || undefined,
         regionId: regionId ? Number(regionId) : undefined,
         estadoDeportivo,
+        perfilPublico,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['boxeador', boxeador.id] })
@@ -144,6 +152,33 @@ export function EditarPerfilDialog({ boxeador, open, onClose }: Props) {
             </TextField>
           </Grid>
         </Grid>
+
+        <Divider sx={{ my: 3 }} />
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={perfilPublico}
+              onChange={(event) => setPerfilPublico(event.target.checked)}
+            />
+          }
+          label={
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+              {perfilPublico ? <PublicIcon fontSize="small" /> : <LockIcon fontSize="small" />}
+              <Stack spacing={0}>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  Perfil público
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {perfilPublico
+                    ? 'Cualquiera puede ver tu perfil completo.'
+                    : 'Solo tú ves tu perfil completo. El resto ve una vista privada.'}
+                </Typography>
+              </Stack>
+            </Stack>
+          }
+        />
+
         {mutation.isError && (
           <Typography color="error" variant="body2" sx={{ mt: 2 }}>
             No se pudo guardar el perfil.

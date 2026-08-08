@@ -1,33 +1,26 @@
-import { useState, type SyntheticEvent } from 'react'
-import Box from '@mui/material/Box'
+import { useState } from 'react'
 import CircularProgress from '@mui/material/CircularProgress'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
-import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { obtenerPerfil } from '../api/boxeadores'
 import { listarCategoriasPeso } from '../api/catalogos'
 import { useAuth } from '../auth/useAuth'
+import { CombatesCard } from '../features/boxeadores/components/CombatesCard'
 import { EditarPerfilDialog } from '../features/boxeadores/components/EditarPerfilDialog'
 import { EquipoCard } from '../features/boxeadores/components/EquipoCard'
-import { EstadisticasTab } from '../features/boxeadores/components/EstadisticasTab'
-import { HistorialTab } from '../features/boxeadores/components/HistorialTab'
 import { InformacionBasicaCard } from '../features/boxeadores/components/InformacionBasicaCard'
-import { MultimediaTab } from '../features/boxeadores/components/MultimediaTab'
-import { PalmaresTab } from '../features/boxeadores/components/PalmaresTab'
+import { MultimediaCard } from '../features/boxeadores/components/MultimediaCard'
+import { PalmaresResumenCard } from '../features/boxeadores/components/PalmaresResumenCard'
+import { PerfilDeportivoCard } from '../features/boxeadores/components/PerfilDeportivoCard'
 import { PerfilHero } from '../features/boxeadores/components/PerfilHero'
 import { PerfilPrivadoCard } from '../features/boxeadores/components/PerfilPrivadoCard'
-import { ProximasPeleasTab } from '../features/boxeadores/components/ProximasPeleasTab'
-
-type TabKey = 'estadisticas' | 'historial' | 'proximas' | 'palmares' | 'multimedia'
 
 export function BoxeadorPerfilPage() {
   const { id } = useParams<{ id: string }>()
   const { auth } = useAuth()
-  const [tab, setTab] = useState<TabKey>('estadisticas')
   const [editOpen, setEditOpen] = useState(false)
 
   const query = useQuery({
@@ -48,11 +41,8 @@ export function BoxeadorPerfilPage() {
 
   const boxeador = query.data
   const esPropio = auth?.usuarioId === boxeador.id
+  const verPublico = esPropio || boxeador.perfilPublico
   const pesoMax = categoriasQuery.data?.find((c) => c.id === boxeador.categoriaId)?.pesoMax ?? null
-
-  function handleTabChange(_event: SyntheticEvent, value: TabKey) {
-    setTab(value)
-  }
 
   return (
     <Stack spacing={4}>
@@ -63,42 +53,48 @@ export function BoxeadorPerfilPage() {
         onEditar={() => setEditOpen(true)}
       />
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 8 }}>
-          <Stack spacing={4}>
-            <InformacionBasicaCard
-              pesoActual={boxeador.pesoActual}
-              categoriaNombre={boxeador.categoriaNombre}
-              gimnasioNombre={boxeador.gimnasioNombre}
-              regionNombre={boxeador.regionNombre}
-            />
-
-            {esPropio ? (
-              <Box>
-                <Tabs value={tab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
-                  <Tab label="Estadísticas" value="estadisticas" />
-                  <Tab label="Historial" value="historial" />
-                  <Tab label="Próximas peleas" value="proximas" />
-                  <Tab label="Palmarés" value="palmares" />
-                  <Tab label="Multimedia" value="multimedia" />
-                </Tabs>
-                <Box sx={{ pt: 3 }}>
-                  {tab === 'estadisticas' && <EstadisticasTab boxeadorId={boxeador.id} />}
-                  {tab === 'historial' && <HistorialTab boxeadorId={boxeador.id} />}
-                  {tab === 'proximas' && <ProximasPeleasTab boxeadorId={boxeador.id} />}
-                  {tab === 'palmares' && <PalmaresTab boxeadorId={boxeador.id} esPropio={esPropio} />}
-                  {tab === 'multimedia' && <MultimediaTab boxeadorId={boxeador.id} esPropio={esPropio} />}
-                </Box>
-              </Box>
-            ) : (
+      {verPublico ? (
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+            <Stack spacing={3}>
+              <PerfilDeportivoCard
+                boxeadorId={boxeador.id}
+                edad={boxeador.edad}
+                pesoActual={boxeador.pesoActual}
+                categoriaNombre={boxeador.categoriaNombre}
+                nivelProgresion={boxeador.nivelProgresion}
+              />
+              <MultimediaCard boxeadorId={boxeador.id} esPropio={esPropio} />
+            </Stack>
+          </Grid>
+          <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+            <CombatesCard boxeadorId={boxeador.id} />
+          </Grid>
+          <Grid size={{ xs: 12, lg: 4 }}>
+            <Stack spacing={3}>
+              <PalmaresResumenCard boxeadorId={boxeador.id} esPropio={esPropio} />
+              <EquipoCard entrenadorNombre={boxeador.entrenadorNombre} gimnasioNombre={boxeador.gimnasioNombre} />
+            </Stack>
+          </Grid>
+        </Grid>
+      ) : (
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, md: 8 }}>
+            <Stack spacing={4}>
+              <InformacionBasicaCard
+                pesoActual={boxeador.pesoActual}
+                categoriaNombre={boxeador.categoriaNombre}
+                gimnasioNombre={boxeador.gimnasioNombre}
+                regionNombre={boxeador.regionNombre}
+              />
               <PerfilPrivadoCard nombre={boxeador.nombre} />
-            )}
-          </Stack>
+            </Stack>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <EquipoCard entrenadorNombre={boxeador.entrenadorNombre} gimnasioNombre={boxeador.gimnasioNombre} />
+          </Grid>
         </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <EquipoCard entrenadorNombre={boxeador.entrenadorNombre} gimnasioNombre={boxeador.gimnasioNombre} />
-        </Grid>
-      </Grid>
+      )}
 
       {esPropio && (
         <EditarPerfilDialog boxeador={boxeador} open={editOpen} onClose={() => setEditOpen(false)} />

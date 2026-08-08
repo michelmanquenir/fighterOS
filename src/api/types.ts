@@ -149,6 +149,7 @@ export interface BoxeadorPerfilResponse {
   regionNombre: string | null
   estadoDeportivo: EstadoDeportivoEnum
   nivelProgresion: NivelProgresionEnum
+  perfilPublico: boolean
 }
 
 export interface BoxeadorResumenResponse {
@@ -169,6 +170,7 @@ export interface BoxeadorUpdateRequest {
   gimnasioId?: string
   regionId?: number
   estadoDeportivo?: EstadoDeportivoEnum
+  perfilPublico?: boolean
 }
 
 export interface EstadisticasResponse {
