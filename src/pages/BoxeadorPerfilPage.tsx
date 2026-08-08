@@ -1,8 +1,7 @@
 import { useState, type SyntheticEvent } from 'react'
-import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
+import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
@@ -10,15 +9,17 @@ import Typography from '@mui/material/Typography'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { obtenerPerfil } from '../api/boxeadores'
+import { listarCategoriasPeso } from '../api/catalogos'
 import { useAuth } from '../auth/useAuth'
-import { CategoriaChip } from '../features/boxeadores/components/CategoriaChip'
 import { EditarPerfilDialog } from '../features/boxeadores/components/EditarPerfilDialog'
+import { EquipoCard } from '../features/boxeadores/components/EquipoCard'
 import { EstadisticasTab } from '../features/boxeadores/components/EstadisticasTab'
-import { EstadoChip } from '../features/boxeadores/components/EstadoChip'
-import { FotoUploadButton } from '../features/boxeadores/components/FotoUploadButton'
 import { HistorialTab } from '../features/boxeadores/components/HistorialTab'
+import { InformacionBasicaCard } from '../features/boxeadores/components/InformacionBasicaCard'
 import { MultimediaTab } from '../features/boxeadores/components/MultimediaTab'
 import { PalmaresTab } from '../features/boxeadores/components/PalmaresTab'
+import { PerfilHero } from '../features/boxeadores/components/PerfilHero'
+import { PerfilPrivadoCard } from '../features/boxeadores/components/PerfilPrivadoCard'
 import { ProximasPeleasTab } from '../features/boxeadores/components/ProximasPeleasTab'
 
 type TabKey = 'estadisticas' | 'historial' | 'proximas' | 'palmares' | 'multimedia'
@@ -34,6 +35,10 @@ export function BoxeadorPerfilPage() {
     queryFn: () => obtenerPerfil(id!),
     enabled: !!id,
   })
+  const categoriasQuery = useQuery({
+    queryKey: ['catalogos', 'categorias-peso'],
+    queryFn: listarCategoriasPeso,
+  })
 
   if (!id) return null
   if (query.isLoading) return <CircularProgress />
@@ -43,6 +48,7 @@ export function BoxeadorPerfilPage() {
 
   const boxeador = query.data
   const esPropio = auth?.usuarioId === boxeador.id
+  const pesoMax = categoriasQuery.data?.find((c) => c.id === boxeador.categoriaId)?.pesoMax ?? null
 
   function handleTabChange(_event: SyntheticEvent, value: TabKey) {
     setTab(value)
@@ -50,66 +56,47 @@ export function BoxeadorPerfilPage() {
 
   return (
     <Stack spacing={4}>
-      <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        spacing={3}
-        sx={{ alignItems: { sm: 'center' } }}
-      >
-        <Box sx={{ position: 'relative' }}>
-          <Avatar src={boxeador.fotoUrl ?? undefined} sx={{ width: 120, height: 120, fontSize: '2.5rem' }}>
-            {boxeador.nombre.charAt(0)}
-          </Avatar>
-          {esPropio && (
-            <Box sx={{ position: 'absolute', bottom: -8, right: -8 }}>
-              <FotoUploadButton boxeadorId={boxeador.id} />
-            </Box>
-          )}
+      <PerfilHero
+        boxeador={boxeador}
+        esPropio={esPropio}
+        pesoMax={pesoMax}
+        onEditar={() => setEditOpen(true)}
+      />
+
+      <InformacionBasicaCard
+        pesoActual={boxeador.pesoActual}
+        categoriaNombre={boxeador.categoriaNombre}
+        gimnasioNombre={boxeador.gimnasioNombre}
+        regionNombre={boxeador.regionNombre}
+      />
+
+      {esPropio ? (
+        <Box>
+          <Tabs value={tab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
+            <Tab label="Estadísticas" value="estadisticas" />
+            <Tab label="Historial" value="historial" />
+            <Tab label="Próximas peleas" value="proximas" />
+            <Tab label="Palmarés" value="palmares" />
+            <Tab label="Multimedia" value="multimedia" />
+          </Tabs>
+          <Box sx={{ pt: 3 }}>
+            {tab === 'estadisticas' && <EstadisticasTab boxeadorId={boxeador.id} />}
+            {tab === 'historial' && <HistorialTab boxeadorId={boxeador.id} />}
+            {tab === 'proximas' && <ProximasPeleasTab boxeadorId={boxeador.id} />}
+            {tab === 'palmares' && <PalmaresTab boxeadorId={boxeador.id} esPropio={esPropio} />}
+            {tab === 'multimedia' && <MultimediaTab boxeadorId={boxeador.id} esPropio={esPropio} />}
+          </Box>
         </Box>
-
-        <Stack spacing={1} sx={{ flexGrow: 1 }}>
-          <Typography variant="h1">{boxeador.nombre}</Typography>
-          <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
-            <CategoriaChip nombre={boxeador.categoriaNombre} />
-            <EstadoChip estado={boxeador.estadoDeportivo} />
-            {boxeador.gimnasioNombre && (
-              <Typography variant="body2" color="text.secondary">
-                {boxeador.gimnasioNombre}
-              </Typography>
-            )}
-            {boxeador.regionNombre && (
-              <Typography variant="body2" color="text.secondary">
-                · {boxeador.regionNombre}
-              </Typography>
-            )}
-          </Stack>
-          <Typography variant="body2" color="text.secondary">
-            {boxeador.edad} años · RUT {boxeador.rut} · {boxeador.sexo === 'M' ? 'Masculino' : 'Femenino'}
-          </Typography>
-        </Stack>
-
-        {esPropio && (
-          <Button variant="outlined" onClick={() => setEditOpen(true)}>
-            Editar perfil
-          </Button>
-        )}
-      </Stack>
-
-      <Box>
-        <Tabs value={tab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
-          <Tab label="Estadísticas" value="estadisticas" />
-          <Tab label="Historial" value="historial" />
-          <Tab label="Próximas peleas" value="proximas" />
-          <Tab label="Palmarés" value="palmares" />
-          <Tab label="Multimedia" value="multimedia" />
-        </Tabs>
-        <Box sx={{ pt: 3 }}>
-          {tab === 'estadisticas' && <EstadisticasTab boxeadorId={boxeador.id} />}
-          {tab === 'historial' && <HistorialTab boxeadorId={boxeador.id} />}
-          {tab === 'proximas' && <ProximasPeleasTab boxeadorId={boxeador.id} />}
-          {tab === 'palmares' && <PalmaresTab boxeadorId={boxeador.id} esPropio={esPropio} />}
-          {tab === 'multimedia' && <MultimediaTab boxeadorId={boxeador.id} esPropio={esPropio} />}
-        </Box>
-      </Box>
+      ) : (
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, md: 8 }}>
+            <PerfilPrivadoCard nombre={boxeador.nombre} />
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <EquipoCard entrenadorNombre={boxeador.entrenadorNombre} gimnasioNombre={boxeador.gimnasioNombre} />
+          </Grid>
+        </Grid>
+      )}
 
       {esPropio && (
         <EditarPerfilDialog boxeador={boxeador} open={editOpen} onClose={() => setEditOpen(false)} />
