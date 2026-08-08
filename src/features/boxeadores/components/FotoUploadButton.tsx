@@ -13,6 +13,7 @@ export function FotoUploadButton({ boxeadorId }: { boxeadorId: string }) {
     mutationFn: (file: File) => subirFoto(boxeadorId, file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['boxeador', boxeadorId] })
+      queryClient.invalidateQueries({ queryKey: ['usuarios', 'me'] })
     },
   })
 
