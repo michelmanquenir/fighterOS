@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react'
+import SearchIcon from '@mui/icons-material/Search'
 import Grid from '@mui/material/Grid'
+import InputAdornment from '@mui/material/InputAdornment'
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import { useQuery } from '@tanstack/react-query'
@@ -21,8 +24,38 @@ export function BoxeadorFiltros({ filtros, onChange }: Props) {
     queryFn: listarGimnasios,
   })
 
+  const [nombre, setNombre] = useState(filtros.nombre ?? '')
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const nombreFiltro = nombre.trim() || undefined
+      if (nombreFiltro !== filtros.nombre) {
+        onChange({ ...filtros, nombre: nombreFiltro })
+      }
+    }, 400)
+    return () => clearTimeout(timeout)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo re-dispara al tipear, no en cada cambio de filtros/onChange
+  }, [nombre])
+
   return (
     <Grid container spacing={2}>
+      <Grid size={12}>
+        <TextField
+          fullWidth
+          label="Buscar por nombre"
+          value={nombre}
+          onChange={(event) => setNombre(event.target.value)}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+      </Grid>
       <Grid size={{ xs: 12, sm: 3 }}>
         <TextField
           select
