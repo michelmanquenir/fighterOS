@@ -1,3 +1,4 @@
+import type { ChangeEvent } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -17,6 +18,7 @@ import { registrarBoxeador } from '../api/auth'
 import { listarCategoriasPeso, listarGimnasios, listarRegiones } from '../api/catalogos'
 import { extraerMensajeError } from '../api/errors'
 import { useAuth } from '../auth/useAuth'
+import { encontrarCategoriaPorPeso } from '../features/boxeadores/utils/categoriaPeso'
 
 const schema = z.object({
   nombre: z.string().min(1, 'Requerido'),
@@ -52,6 +54,8 @@ export function RegistroBoxeadorPage() {
     register,
     handleSubmit,
     control,
+    getValues,
+    setValue,
     formState: { errors, isSubmitted },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -64,6 +68,15 @@ export function RegistroBoxeadorPage() {
     const el = document.querySelector<HTMLElement>(`[name="${primerCampo}"]`)
     el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     el?.focus()
+  }
+
+  function handlePesoHabitualChange(valor: string) {
+    const peso = Number(valor)
+    if (!valor || Number.isNaN(peso)) return
+    const categoria = encontrarCategoriaPorPeso(categoriasQuery.data, peso, getValues('sexo'))
+    if (categoria) {
+      setValue('categoriaId', categoria.id)
+    }
   }
 
   const mutation = useMutation({
@@ -180,7 +193,10 @@ export function RegistroBoxeadorPage() {
                   label="Peso habitual (kg)"
                   type="number"
                   slotProps={{ htmlInput: { step: '0.1' } }}
-                  {...register('pesoHabitual')}
+                  {...register('pesoHabitual', {
+                    onChange: (event: ChangeEvent<HTMLInputElement>) =>
+                      handlePesoHabitualChange(event.target.value),
+                  })}
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 4 }}>
@@ -192,7 +208,7 @@ export function RegistroBoxeadorPage() {
                       select
                       fullWidth
                       label="Categoría"
-                      helperText="Se asigna automático si no la eliges"
+                      helperText="Se sugiere según el peso habitual, puedes cambiarla"
                       {...field}
                     >
                       <MenuItem value="">Auto-asignar</MenuItem>

@@ -18,6 +18,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { actualizar } from '../../../api/boxeadores'
 import { listarCategoriasPeso, listarGimnasios, listarRegiones } from '../../../api/catalogos'
 import type { BoxeadorPerfilResponse, EstadoDeportivoEnum } from '../../../api/types'
+import { encontrarCategoriaPorPeso } from '../utils/categoriaPeso'
 
 interface Props {
   boxeador: BoxeadorPerfilResponse
@@ -46,6 +47,16 @@ export function EditarPerfilDialog({ boxeador, open, onClose }: Props) {
     queryKey: ['catalogos', 'gimnasios'],
     queryFn: listarGimnasios,
   })
+
+  function handlePesoHabitualChange(valor: string) {
+    setPesoHabitual(valor)
+    const peso = Number(valor)
+    if (!valor || Number.isNaN(peso)) return
+    const categoria = encontrarCategoriaPorPeso(categoriasQuery.data, peso, boxeador.sexo)
+    if (categoria) {
+      setCategoriaId(categoria.id)
+    }
+  }
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -85,7 +96,7 @@ export function EditarPerfilDialog({ boxeador, open, onClose }: Props) {
               label="Peso habitual (kg)"
               type="number"
               value={pesoHabitual}
-              onChange={(event) => setPesoHabitual(event.target.value)}
+              onChange={(event) => handlePesoHabitualChange(event.target.value)}
               slotProps={{ htmlInput: { step: '0.1' } }}
             />
           </Grid>
@@ -94,6 +105,7 @@ export function EditarPerfilDialog({ boxeador, open, onClose }: Props) {
               select
               fullWidth
               label="Categoría"
+              helperText="Se sugiere según el peso habitual, puedes cambiarla"
               value={categoriaId}
               onChange={(event) => setCategoriaId(event.target.value)}
             >
