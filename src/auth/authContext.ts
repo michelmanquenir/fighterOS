@@ -6,6 +6,7 @@ export interface AuthContextValue {
   auth: StoredAuth | null
   login: (response: AuthResponse) => void
   logout: () => void
+  actualizarRoles: (roles: string[]) => void
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)

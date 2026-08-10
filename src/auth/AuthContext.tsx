@@ -23,5 +23,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuth(null)
   }
 
-  return <AuthContext.Provider value={{ auth, login, logout }}>{children}</AuthContext.Provider>
+  function actualizarRoles(roles: string[]) {
+    setAuth((current) => {
+      if (!current) return current
+      const stored: StoredAuth = { ...current, roles }
+      setStoredAuth(stored)
+      return stored
+    })
+  }
+
+  return (
+    <AuthContext.Provider value={{ auth, login, logout, actualizarRoles }}>{children}</AuthContext.Provider>
+  )
 }

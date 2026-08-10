@@ -108,6 +108,27 @@ export interface RegistroGimnasioRequest {
   descripcion?: string
 }
 
+export interface GimnasioCreateRequest {
+  nombre: string
+  direccion?: string
+  regionId?: number
+  telefono?: string
+  email?: string
+  descripcion?: string
+}
+
+export interface GimnasioMioResponse {
+  id: string
+  nombre: string
+  direccion: string | null
+  regionId: number | null
+  regionNombre: string | null
+  telefono: string | null
+  email: string | null
+  descripcion: string | null
+  roles: string[]
+}
+
 export interface AuthResponse {
   token: string
   usuarioId: string

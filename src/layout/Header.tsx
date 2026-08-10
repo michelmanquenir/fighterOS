@@ -114,6 +114,11 @@ export function Header() {
                     Mi perfil
                   </Button>
                 )}
+                {!hasRole(auth, 'gimnasio_admin') && (
+                  <Button component={RouterLink} to="/gimnasios/crear" color="inherit">
+                    Crear gimnasio
+                  </Button>
+                )}
                 <Button onClick={handleLogout} variant="outlined" color="primary">
                   Salir
                 </Button>
@@ -179,6 +184,15 @@ export function Header() {
                   sx={{ justifyContent: 'flex-start' }}
                 >
                   Mi perfil
+                </Button>
+              )}
+              {!hasRole(auth, 'gimnasio_admin') && (
+                <Button
+                  onClick={() => handleNavigate('/gimnasios/crear')}
+                  color="inherit"
+                  sx={{ justifyContent: 'flex-start' }}
+                >
+                  Crear gimnasio
                 </Button>
               )}
               <Button onClick={handleLogout} variant="outlined" color="primary">
