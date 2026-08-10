@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import SearchIcon from '@mui/icons-material/Search'
 import Grid from '@mui/material/Grid'
 import InputAdornment from '@mui/material/InputAdornment'
@@ -11,9 +10,11 @@ import type { BoxeadorFiltros as Filtros, EstadoDeportivoEnum } from '../../../a
 interface Props {
   filtros: Filtros
   onChange: (filtros: Filtros) => void
+  busqueda: string
+  onBusquedaChange: (busqueda: string) => void
 }
 
-export function BoxeadorFiltros({ filtros, onChange }: Props) {
+export function BoxeadorFiltros({ filtros, onChange, busqueda, onBusquedaChange }: Props) {
   const regionesQuery = useQuery({ queryKey: ['catalogos', 'regiones'], queryFn: listarRegiones })
   const categoriasQuery = useQuery({
     queryKey: ['catalogos', 'categorias-peso'],
@@ -24,27 +25,15 @@ export function BoxeadorFiltros({ filtros, onChange }: Props) {
     queryFn: listarGimnasios,
   })
 
-  const [nombre, setNombre] = useState(filtros.nombre ?? '')
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      const nombreFiltro = nombre.trim() || undefined
-      if (nombreFiltro !== filtros.nombre) {
-        onChange({ ...filtros, nombre: nombreFiltro })
-      }
-    }, 400)
-    return () => clearTimeout(timeout)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo re-dispara al tipear, no en cada cambio de filtros/onChange
-  }, [nombre])
-
   return (
     <Grid container spacing={2}>
       <Grid size={12}>
         <TextField
           fullWidth
           label="Buscar por nombre"
-          value={nombre}
-          onChange={(event) => setNombre(event.target.value)}
+          helperText="Filtra entre los boxeadores mostrados en esta página"
+          value={busqueda}
+          onChange={(event) => onBusquedaChange(event.target.value)}
           slotProps={{
             input: {
               startAdornment: (
