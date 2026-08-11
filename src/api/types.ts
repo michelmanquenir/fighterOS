@@ -314,6 +314,7 @@ export interface EventoResponse {
   reglamentoUrl: string | null
   organizadorId: string
   organizadorNombre: string
+  gimnasioId: string | null
   gimnasioNombre: string | null
 }
 
@@ -326,6 +327,7 @@ export interface EventoCreateRequest {
   cuposTotales?: number
   reglamentoUrl?: string
   afichePosterUrl?: string
+  gimnasioId?: string
 }
 
 export interface EventoUpdateRequest {

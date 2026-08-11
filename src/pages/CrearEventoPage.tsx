@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -16,6 +17,7 @@ import { useNavigate } from 'react-router-dom'
 import { crear } from '../api/eventos'
 import { listarRegiones } from '../api/catalogos'
 import { extraerMensajeError } from '../api/errors'
+import { obtenerMisGimnasios } from '../api/gimnasios'
 
 const schema = z.object({
   nombre: z.string().min(1, 'Requerido'),
@@ -23,6 +25,7 @@ const schema = z.object({
   fecha: z.string().min(1, 'Requerido'),
   lugar: z.string().optional(),
   regionId: z.string().optional(),
+  gimnasioId: z.string().optional(),
   cuposTotales: z.string().optional(),
   reglamentoUrl: z.string().optional(),
   afichePosterUrl: z.string().optional(),
@@ -33,16 +36,25 @@ type FormValues = z.infer<typeof schema>
 export function CrearEventoPage() {
   const navigate = useNavigate()
   const regionesQuery = useQuery({ queryKey: ['catalogos', 'regiones'], queryFn: listarRegiones })
+  const gimnasiosQuery = useQuery({ queryKey: ['gimnasios', 'mios'], queryFn: obtenerMisGimnasios })
 
   const {
     register,
     handleSubmit,
     control,
+    setValue,
+    getValues,
     formState: { errors, isSubmitted },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { tipo: 'velada', regionId: '' },
+    defaultValues: { tipo: 'velada', regionId: '', gimnasioId: '' },
   })
+
+  useEffect(() => {
+    if (gimnasiosQuery.data?.length === 1 && !getValues('gimnasioId')) {
+      setValue('gimnasioId', gimnasiosQuery.data[0].id)
+    }
+  }, [gimnasiosQuery.data, getValues, setValue])
 
   const mutation = useMutation({
     mutationFn: (values: FormValues) =>
@@ -52,6 +64,7 @@ export function CrearEventoPage() {
         fecha: values.fecha,
         lugar: values.lugar || undefined,
         regionId: values.regionId ? Number(values.regionId) : undefined,
+        gimnasioId: values.gimnasioId || undefined,
         cuposTotales: values.cuposTotales ? Number(values.cuposTotales) : undefined,
         reglamentoUrl: values.reglamentoUrl || undefined,
         afichePosterUrl: values.afichePosterUrl || undefined,
@@ -108,6 +121,30 @@ export function CrearEventoPage() {
                   helperText={errors.fecha?.message}
                 />
               </Grid>
+              {gimnasiosQuery.data && gimnasiosQuery.data.length > 1 && (
+                <Grid size={12}>
+                  <Controller
+                    name="gimnasioId"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        select
+                        fullWidth
+                        label="Gimnasio organizador"
+                        helperText="Tienes más de un gimnasio, elige cuál organiza este evento"
+                        {...field}
+                      >
+                        <MenuItem value="">Selecciona un gimnasio</MenuItem>
+                        {gimnasiosQuery.data.map((gimnasio) => (
+                          <MenuItem key={gimnasio.id} value={gimnasio.id}>
+                            {gimnasio.nombre}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    )}
+                  />
+                </Grid>
+              )}
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="Lugar" {...register('lugar')} />
               </Grid>
