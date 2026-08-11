@@ -13,6 +13,7 @@ import { CombatesCard } from '../features/boxeadores/components/CombatesCard'
 import { EditarPerfilDialog } from '../features/boxeadores/components/EditarPerfilDialog'
 import { EquipoCard } from '../features/boxeadores/components/EquipoCard'
 import { InformacionBasicaCard } from '../features/boxeadores/components/InformacionBasicaCard'
+import { MiGimnasioCard } from '../features/boxeadores/components/MiGimnasioCard'
 import { MultimediaCard } from '../features/boxeadores/components/MultimediaCard'
 import { PalmaresResumenCard } from '../features/boxeadores/components/PalmaresResumenCard'
 import { PerfilDeportivoCard } from '../features/boxeadores/components/PerfilDeportivoCard'
@@ -81,6 +82,7 @@ export function BoxeadorPerfilPage() {
           </Grid>
           <Grid size={{ xs: 12, lg: 4 }}>
             <Stack spacing={3}>
+              {esPropio && <MiGimnasioCard />}
               {esPropio && <SolicitudesSeguimientoCard />}
               <PalmaresResumenCard boxeadorId={boxeador.id} esPropio={esPropio} />
               <EquipoCard entrenadorNombre={boxeador.entrenadorNombre} gimnasioNombre={boxeador.gimnasioNombre} />
