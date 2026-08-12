@@ -341,6 +341,21 @@ export interface EventoUpdateRequest {
   afichePosterUrl?: string
 }
 
+export interface EventoInscripcionResponse {
+  boxeadorId: string
+  boxeadorNombre: string
+  boxeadorFotoUrl: string | null
+  pesoActual: number | null
+  categoriaNombre: string | null
+  gimnasioId: string
+  gimnasioNombre: string
+  fecha: string
+}
+
+export interface EventoInscripcionCreateRequest {
+  boxeadorId: string
+}
+
 export interface EventoFiltros {
   regionId?: number
   tipo?: TipoEventoEnum

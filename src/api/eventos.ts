@@ -2,6 +2,8 @@ import { apiClient } from './client'
 import type {
   EventoCreateRequest,
   EventoFiltros,
+  EventoInscripcionCreateRequest,
+  EventoInscripcionResponse,
   EventoResponse,
   EventoUpdateRequest,
   Page,
@@ -41,4 +43,24 @@ export async function subirArchivo(archivo: File): Promise<{ url: string }> {
   formData.append('archivo', archivo)
   const { data } = await apiClient.post<{ url: string }>('/api/eventos/archivos', formData)
   return data
+}
+
+export async function listarInscripciones(eventoId: string): Promise<EventoInscripcionResponse[]> {
+  const { data } = await apiClient.get<EventoInscripcionResponse[]>(`/api/eventos/${eventoId}/inscripciones`)
+  return data
+}
+
+export async function inscribirBoxeador(
+  eventoId: string,
+  request: EventoInscripcionCreateRequest,
+): Promise<EventoInscripcionResponse> {
+  const { data } = await apiClient.post<EventoInscripcionResponse>(
+    `/api/eventos/${eventoId}/inscripciones`,
+    request,
+  )
+  return data
+}
+
+export async function retirarInscripcion(eventoId: string, boxeadorId: string): Promise<void> {
+  await apiClient.delete(`/api/eventos/${eventoId}/inscripciones/${boxeadorId}`)
 }

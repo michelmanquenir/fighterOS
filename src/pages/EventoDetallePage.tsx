@@ -11,6 +11,7 @@ import { obtener } from '../api/eventos'
 import { useAuth } from '../auth/useAuth'
 import { EditarEventoDialog } from '../features/eventos/components/EditarEventoDialog'
 import { EstadoEventoChip } from '../features/eventos/components/EstadoEventoChip'
+import { InscripcionesEventoCard } from '../features/eventos/components/InscripcionesEventoCard'
 
 const TIPO_LABEL: Record<string, string> = {
   torneo: 'Torneo',
@@ -93,6 +94,10 @@ export function EventoDetallePage() {
             </Button>
           )}
         </Stack>
+      </Grid>
+
+      <Grid size={12}>
+        <InscripcionesEventoCard eventoId={evento.id} />
       </Grid>
 
       {esOrganizador && (
