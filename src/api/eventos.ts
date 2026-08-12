@@ -35,3 +35,10 @@ export async function actualizar(id: string, request: EventoUpdateRequest): Prom
   const { data } = await apiClient.put<EventoResponse>(`/api/eventos/${id}`, request)
   return data
 }
+
+export async function subirArchivo(archivo: File): Promise<{ url: string }> {
+  const formData = new FormData()
+  formData.append('archivo', archivo)
+  const { data } = await apiClient.post<{ url: string }>('/api/eventos/archivos', formData)
+  return data
+}

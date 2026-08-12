@@ -18,6 +18,7 @@ import { crear } from '../api/eventos'
 import { listarRegiones } from '../api/catalogos'
 import { extraerMensajeError } from '../api/errors'
 import { obtenerMisGimnasios } from '../api/gimnasios'
+import { ReglamentoUploadField } from '../features/eventos/components/ReglamentoUploadField'
 
 const schema = z.object({
   nombre: z.string().min(1, 'Requerido'),
@@ -176,7 +177,13 @@ export function CrearEventoPage() {
                 <TextField fullWidth label="URL del afiche" {...register('afichePosterUrl')} />
               </Grid>
               <Grid size={12}>
-                <TextField fullWidth label="URL del reglamento" {...register('reglamentoUrl')} />
+                <Controller
+                  name="reglamentoUrl"
+                  control={control}
+                  render={({ field }) => (
+                    <ReglamentoUploadField value={field.value ?? ''} onChange={field.onChange} />
+                  )}
+                />
               </Grid>
             </Grid>
             {mutation.isError && (
