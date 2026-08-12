@@ -12,6 +12,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { actualizar } from '../../../api/eventos'
 import { listarRegiones } from '../../../api/catalogos'
 import type { EstadoEventoEnum, EventoResponse } from '../../../api/types'
+import { AficheUploadField } from './AficheUploadField'
 import { ReglamentoUploadField } from './ReglamentoUploadField'
 
 interface Props {
@@ -28,6 +29,7 @@ export function EditarEventoDialog({ evento, open, onClose }: Props) {
   const [cuposTotales, setCuposTotales] = useState(evento.cuposTotales?.toString() ?? '')
   const [estado, setEstado] = useState<EstadoEventoEnum>(evento.estado)
   const [reglamentoUrl, setReglamentoUrl] = useState(evento.reglamentoUrl ?? '')
+  const [afichePosterUrl, setAfichePosterUrl] = useState(evento.afichePosterUrl ?? '')
 
   const queryClient = useQueryClient()
   const regionesQuery = useQuery({ queryKey: ['catalogos', 'regiones'], queryFn: listarRegiones })
@@ -42,6 +44,7 @@ export function EditarEventoDialog({ evento, open, onClose }: Props) {
         cuposTotales: cuposTotales ? Number(cuposTotales) : undefined,
         estado,
         reglamentoUrl: reglamentoUrl || undefined,
+        afichePosterUrl: afichePosterUrl || undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['evento', evento.id] })
@@ -104,6 +107,9 @@ export function EditarEventoDialog({ evento, open, onClose }: Props) {
               <MenuItem value="finalizado">Finalizado</MenuItem>
               <MenuItem value="cancelado">Cancelado</MenuItem>
             </TextField>
+          </Grid>
+          <Grid size={12}>
+            <AficheUploadField value={afichePosterUrl} onChange={setAfichePosterUrl} />
           </Grid>
           <Grid size={12}>
             <ReglamentoUploadField value={reglamentoUrl} onChange={setReglamentoUrl} />

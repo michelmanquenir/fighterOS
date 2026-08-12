@@ -18,6 +18,7 @@ import { crear } from '../api/eventos'
 import { listarRegiones } from '../api/catalogos'
 import { extraerMensajeError } from '../api/errors'
 import { obtenerMisGimnasios } from '../api/gimnasios'
+import { AficheUploadField } from '../features/eventos/components/AficheUploadField'
 import { ReglamentoUploadField } from '../features/eventos/components/ReglamentoUploadField'
 
 const schema = z.object({
@@ -173,8 +174,14 @@ export function CrearEventoPage() {
                   {...register('cuposTotales')}
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="URL del afiche" {...register('afichePosterUrl')} />
+              <Grid size={12}>
+                <Controller
+                  name="afichePosterUrl"
+                  control={control}
+                  render={({ field }) => (
+                    <AficheUploadField value={field.value ?? ''} onChange={field.onChange} />
+                  )}
+                />
               </Grid>
               <Grid size={12}>
                 <Controller
