@@ -186,7 +186,7 @@ export function PerfilHero({ boxeador, esPropio, pesoMax, onEditar }: PerfilHero
 
       <Stack spacing={1.5} sx={{ flexGrow: 1 }}>
         <Typography variant="h1">{boxeador.nombre}</Typography>
-        <IdConCopia id={boxeador.id} />
+        {esPropio && <IdConCopia id={boxeador.id} />}
 
         <Stack direction="row" spacing={1} sx={{ alignItems: 'baseline', flexWrap: 'wrap' }}>
           {boxeador.pesoActual != null && (
