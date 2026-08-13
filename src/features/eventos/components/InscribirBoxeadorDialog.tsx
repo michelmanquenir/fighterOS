@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Alert from '@mui/material/Alert'
-import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete'
+import Autocomplete from '@mui/material/Autocomplete'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
@@ -17,10 +17,6 @@ import { inscribirBoxeador } from '../../../api/eventos'
 import { obtenerMisGimnasios } from '../../../api/gimnasios'
 import type { BoxeadorResumenResponse } from '../../../api/types'
 
-const filtrarBoxeadores = createFilterOptions<BoxeadorResumenResponse>({
-  stringify: (option) => `${option.nombre} ${option.id}`,
-})
-
 function useDebounced<T>(valor: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(valor)
   useEffect(() => {
@@ -30,18 +26,14 @@ function useDebounced<T>(valor: T, delayMs: number): T {
   return debounced
 }
 
-function BoxeadorOption({ option }: { option: BoxeadorResumenResponse }) {
-  return (
-    <Stack spacing={0}>
-      <span>
-        {option.nombre} {option.categoriaNombre ? `(${option.categoriaNombre})` : ''}
-      </span>
-      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
-        {option.id}
-        {option.gimnasioNombre ? ` · ${option.gimnasioNombre}` : ''}
-      </Typography>
-    </Stack>
-  )
+// Filtro por nombre, siempre aplicado en el cliente encima de lo que
+// haya devuelto el servidor - así lo que se ve nunca queda más ancho
+// que lo que escribiste, sin importar qué tan al día esté la búsqueda
+// del servidor.
+function filtrarPorNombre(opciones: BoxeadorResumenResponse[], texto: string): BoxeadorResumenResponse[] {
+  const buscado = texto.trim().toLowerCase()
+  if (!buscado) return opciones
+  return opciones.filter((o) => o.nombre.toLowerCase().includes(buscado))
 }
 
 interface Props {
@@ -127,9 +119,9 @@ export function InscribirBoxeadorDialog({ eventoId, esOrganizador, open, onClose
             options={opciones}
             value={boxeador}
             onChange={(_event, value) => setBoxeador(value)}
-            inputValue={esOrganizador ? busqueda : undefined}
-            onInputChange={esOrganizador ? (_event, value) => setBusqueda(value) : undefined}
-            filterOptions={esOrganizador ? (x) => x : filtrarBoxeadores}
+            inputValue={busqueda}
+            onInputChange={(_event, value) => setBusqueda(value)}
+            filterOptions={(opts, state) => filtrarPorNombre(opts, state.inputValue)}
             getOptionLabel={(option) => option.nombre}
             isOptionEqualToValue={(option, value) => option.id === value.id}
             disabled={!esOrganizador && !gimnasioSeleccionado}
@@ -141,14 +133,23 @@ export function InscribirBoxeadorDialog({ eventoId, esOrganizador, open, onClose
             }
             renderOption={(props, option) => (
               <li {...props} key={option.id}>
-                <BoxeadorOption option={option} />
+                <Stack spacing={0}>
+                  <span>
+                    {option.nombre} {option.categoriaNombre ? `(${option.categoriaNombre})` : ''}
+                  </span>
+                  {esOrganizador && option.gimnasioNombre && (
+                    <Typography variant="caption" color="text.secondary">
+                      {option.gimnasioNombre}
+                    </Typography>
+                  )}
+                </Stack>
               </li>
             )}
             renderInput={(params) => (
               <TextField
                 {...params}
                 label="Boxeador"
-                placeholder="Busca por nombre o pega el ID"
+                placeholder="Busca por nombre"
                 helperText={
                   !esOrganizador &&
                   gimnasioSeleccionado &&
