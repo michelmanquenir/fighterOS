@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Alert from '@mui/material/Alert'
+import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
@@ -8,11 +9,17 @@ import DialogTitle from '@mui/material/DialogTitle'
 import MenuItem from '@mui/material/MenuItem'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { listar as listarBoxeadores } from '../../../api/boxeadores'
 import { extraerMensajeError } from '../../../api/errors'
 import { inscribirBoxeador } from '../../../api/eventos'
 import { obtenerMisGimnasios } from '../../../api/gimnasios'
+import type { BoxeadorResumenResponse } from '../../../api/types'
+
+const filtrarBoxeadores = createFilterOptions<BoxeadorResumenResponse>({
+  stringify: (option) => `${option.nombre} ${option.id}`,
+})
 
 interface Props {
   eventoId: string
@@ -22,7 +29,7 @@ interface Props {
 
 export function InscribirBoxeadorDialog({ eventoId, open, onClose }: Props) {
   const [gimnasioId, setGimnasioId] = useState('')
-  const [boxeadorId, setBoxeadorId] = useState('')
+  const [boxeador, setBoxeador] = useState<BoxeadorResumenResponse | null>(null)
   const queryClient = useQueryClient()
 
   const gimnasiosQuery = useQuery({
@@ -40,10 +47,10 @@ export function InscribirBoxeadorDialog({ eventoId, open, onClose }: Props) {
   })
 
   const mutation = useMutation({
-    mutationFn: () => inscribirBoxeador(eventoId, { boxeadorId }),
+    mutationFn: () => inscribirBoxeador(eventoId, { boxeadorId: boxeador!.id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['eventos', eventoId, 'inscripciones'] })
-      setBoxeadorId('')
+      setBoxeador(null)
       onClose()
     },
   })
@@ -61,7 +68,7 @@ export function InscribirBoxeadorDialog({ eventoId, open, onClose }: Props) {
               value={gimnasioId}
               onChange={(e) => {
                 setGimnasioId(e.target.value)
-                setBoxeadorId('')
+                setBoxeador(null)
               }}
             >
               <MenuItem value="">Selecciona un gimnasio</MenuItem>
@@ -73,26 +80,40 @@ export function InscribirBoxeadorDialog({ eventoId, open, onClose }: Props) {
             </TextField>
           )}
 
-          <TextField
-            select
-            fullWidth
-            label="Boxeador"
-            value={boxeadorId}
-            onChange={(e) => setBoxeadorId(e.target.value)}
+          <Autocomplete
+            options={boxeadoresQuery.data?.content ?? []}
+            value={boxeador}
+            onChange={(_event, value) => setBoxeador(value)}
+            filterOptions={filtrarBoxeadores}
+            getOptionLabel={(option) => option.nombre}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
             disabled={!gimnasioSeleccionado}
-            helperText={
-              gimnasioSeleccionado && boxeadoresQuery.data?.content.length === 0
-                ? 'Este gimnasio no tiene boxeadores registrados'
-                : undefined
-            }
-          >
-            <MenuItem value="">Selecciona un boxeador</MenuItem>
-            {boxeadoresQuery.data?.content.map((boxeador) => (
-              <MenuItem key={boxeador.id} value={boxeador.id}>
-                {boxeador.nombre} {boxeador.categoriaNombre ? `(${boxeador.categoriaNombre})` : ''}
-              </MenuItem>
-            ))}
-          </TextField>
+            noOptionsText="Sin resultados"
+            renderOption={(props, option) => (
+              <li {...props} key={option.id}>
+                <Stack spacing={0}>
+                  <span>
+                    {option.nombre} {option.categoriaNombre ? `(${option.categoriaNombre})` : ''}
+                  </span>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                    {option.id}
+                  </Typography>
+                </Stack>
+              </li>
+            )}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Boxeador"
+                placeholder="Busca por nombre o pega el ID"
+                helperText={
+                  gimnasioSeleccionado && boxeadoresQuery.data?.content.length === 0
+                    ? 'Este gimnasio no tiene boxeadores registrados'
+                    : undefined
+                }
+              />
+            )}
+          />
 
           {mutation.isError && (
             <Alert severity="error">
@@ -105,7 +126,7 @@ export function InscribirBoxeadorDialog({ eventoId, open, onClose }: Props) {
         <Button onClick={onClose}>Cancelar</Button>
         <Button
           variant="contained"
-          disabled={!boxeadorId || mutation.isPending}
+          disabled={!boxeador || mutation.isPending}
           onClick={() => mutation.mutate()}
         >
           {mutation.isPending ? 'Inscribiendo...' : 'Inscribir'}

@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import CheckIcon from '@mui/icons-material/Check'
 import ChatIcon from '@mui/icons-material/Chat'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter'
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
 import LockIcon from '@mui/icons-material/Lock'
@@ -21,6 +23,33 @@ import { dejarDeSeguir, obtenerEstado, seguir } from '../../../api/seguidores'
 import type { BoxeadorPerfilResponse, EstadoDeportivoEnum } from '../../../api/types'
 import { useAuth } from '../../../auth/useAuth'
 import { FotoUploadButton } from './FotoUploadButton'
+
+function IdConCopia({ id }: { id: string }) {
+  const [copiado, setCopiado] = useState(false)
+
+  async function copiar() {
+    await navigator.clipboard.writeText(id)
+    setCopiado(true)
+    setTimeout(() => setCopiado(false), 1500)
+  }
+
+  return (
+    <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}
+      >
+        ID: {id}
+      </Typography>
+      <Tooltip title={copiado ? '¡Copiado!' : 'Copiar ID'}>
+        <IconButton size="small" onClick={copiar} aria-label="Copiar ID del boxeador">
+          <ContentCopyIcon sx={{ fontSize: 14 }} />
+        </IconButton>
+      </Tooltip>
+    </Stack>
+  )
+}
 
 const ESTADO_CONFIG: Record<EstadoDeportivoEnum, { label: string; dot: string }> = {
   activo: { label: 'Disponible para competir', dot: '#4CAF50' },
@@ -157,6 +186,7 @@ export function PerfilHero({ boxeador, esPropio, pesoMax, onEditar }: PerfilHero
 
       <Stack spacing={1.5} sx={{ flexGrow: 1 }}>
         <Typography variant="h1">{boxeador.nombre}</Typography>
+        <IdConCopia id={boxeador.id} />
 
         <Stack direction="row" spacing={1} sx={{ alignItems: 'baseline', flexWrap: 'wrap' }}>
           {boxeador.pesoActual != null && (
