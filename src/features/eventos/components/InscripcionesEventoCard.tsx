@@ -19,7 +19,12 @@ import { obtenerMisGimnasios } from '../../../api/gimnasios'
 import { useAuth } from '../../../auth/useAuth'
 import { InscribirBoxeadorDialog } from './InscribirBoxeadorDialog'
 
-export function InscripcionesEventoCard({ eventoId }: { eventoId: string }) {
+interface Props {
+  eventoId: string
+  esOrganizador: boolean
+}
+
+export function InscripcionesEventoCard({ eventoId, esOrganizador }: Props) {
   const { auth } = useAuth()
   const [dialogOpen, setDialogOpen] = useState(false)
   const queryClient = useQueryClient()
@@ -49,7 +54,7 @@ export function InscripcionesEventoCard({ eventoId }: { eventoId: string }) {
       <CardContent>
         <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="h5">Peleadores inscritos</Typography>
-          {misGimnasiosQuery.data && misGimnasiosQuery.data.length > 0 && (
+          {((misGimnasiosQuery.data && misGimnasiosQuery.data.length > 0) || esOrganizador) && (
             <Button
               size="small"
               variant="outlined"
@@ -73,7 +78,7 @@ export function InscripcionesEventoCard({ eventoId }: { eventoId: string }) {
                 divider
                 sx={{ px: 0 }}
                 secondaryAction={
-                  misGimnasioIds.has(inscripcion.gimnasioId) && (
+                  (esOrganizador || misGimnasioIds.has(inscripcion.gimnasioId)) && (
                     <IconButton
                       edge="end"
                       size="small"
@@ -115,7 +120,12 @@ export function InscripcionesEventoCard({ eventoId }: { eventoId: string }) {
         )}
       </CardContent>
 
-      <InscribirBoxeadorDialog eventoId={eventoId} open={dialogOpen} onClose={() => setDialogOpen(false)} />
+      <InscribirBoxeadorDialog
+        eventoId={eventoId}
+        esOrganizador={esOrganizador}
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+      />
     </Card>
   )
 }

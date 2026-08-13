@@ -285,6 +285,7 @@ export interface BoxeadorFiltros {
   regionId?: number
   categoriaId?: string
   estado?: EstadoDeportivoEnum
+  q?: string
 }
 
 // Página estilo Spring Data

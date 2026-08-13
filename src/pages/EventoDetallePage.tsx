@@ -97,7 +97,7 @@ export function EventoDetallePage() {
       </Grid>
 
       <Grid size={12}>
-        <InscripcionesEventoCard eventoId={evento.id} />
+        <InscripcionesEventoCard eventoId={evento.id} esOrganizador={esOrganizador} />
       </Grid>
 
       {esOrganizador && (

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Alert from '@mui/material/Alert'
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete'
 import Button from '@mui/material/Button'
@@ -21,36 +21,73 @@ const filtrarBoxeadores = createFilterOptions<BoxeadorResumenResponse>({
   stringify: (option) => `${option.nombre} ${option.id}`,
 })
 
+function useDebounced<T>(valor: T, delayMs: number): T {
+  const [debounced, setDebounced] = useState(valor)
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebounced(valor), delayMs)
+    return () => clearTimeout(timeout)
+  }, [valor, delayMs])
+  return debounced
+}
+
+function BoxeadorOption({ option }: { option: BoxeadorResumenResponse }) {
+  return (
+    <Stack spacing={0}>
+      <span>
+        {option.nombre} {option.categoriaNombre ? `(${option.categoriaNombre})` : ''}
+      </span>
+      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+        {option.id}
+        {option.gimnasioNombre ? ` · ${option.gimnasioNombre}` : ''}
+      </Typography>
+    </Stack>
+  )
+}
+
 interface Props {
   eventoId: string
+  esOrganizador: boolean
   open: boolean
   onClose: () => void
 }
 
-export function InscribirBoxeadorDialog({ eventoId, open, onClose }: Props) {
+export function InscribirBoxeadorDialog({ eventoId, esOrganizador, open, onClose }: Props) {
   const [gimnasioId, setGimnasioId] = useState('')
   const [boxeador, setBoxeador] = useState<BoxeadorResumenResponse | null>(null)
+  const [busqueda, setBusqueda] = useState('')
+  const busquedaDebounced = useDebounced(busqueda, 300)
   const queryClient = useQueryClient()
 
   const gimnasiosQuery = useQuery({
     queryKey: ['gimnasios', 'mios'],
     queryFn: obtenerMisGimnasios,
-    enabled: open,
+    enabled: open && !esOrganizador,
   })
   const gimnasioSeleccionado =
     gimnasioId || (gimnasiosQuery.data?.length === 1 ? gimnasiosQuery.data[0].id : '')
 
-  const boxeadoresQuery = useQuery({
+  const boxeadoresDeMiGimnasioQuery = useQuery({
     queryKey: ['boxeadores', 'gimnasio', gimnasioSeleccionado],
     queryFn: () => listarBoxeadores({ gimnasioId: gimnasioSeleccionado }, 0),
-    enabled: open && !!gimnasioSeleccionado,
+    enabled: open && !esOrganizador && !!gimnasioSeleccionado,
   })
+
+  const busquedaGlobalQuery = useQuery({
+    queryKey: ['boxeadores', 'buscar', busquedaDebounced],
+    queryFn: () => listarBoxeadores({ q: busquedaDebounced }, 0),
+    enabled: open && esOrganizador && busquedaDebounced.trim().length >= 2,
+  })
+
+  const opciones = esOrganizador
+    ? (busquedaGlobalQuery.data?.content ?? [])
+    : (boxeadoresDeMiGimnasioQuery.data?.content ?? [])
 
   const mutation = useMutation({
     mutationFn: () => inscribirBoxeador(eventoId, { boxeadorId: boxeador!.id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['eventos', eventoId, 'inscripciones'] })
       setBoxeador(null)
+      setBusqueda('')
       onClose()
     },
   })
@@ -60,7 +97,13 @@ export function InscribirBoxeadorDialog({ eventoId, open, onClose }: Props) {
       <DialogTitle>Inscribir peleador</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ pt: 1 }}>
-          {gimnasiosQuery.data && gimnasiosQuery.data.length > 1 && (
+          {esOrganizador && (
+            <Typography variant="body2" color="text.secondary">
+              Eres el organizador: puedes inscribir boxeadores de cualquier gimnasio.
+            </Typography>
+          )}
+
+          {!esOrganizador && gimnasiosQuery.data && gimnasiosQuery.data.length > 1 && (
             <TextField
               select
               fullWidth
@@ -81,24 +124,24 @@ export function InscribirBoxeadorDialog({ eventoId, open, onClose }: Props) {
           )}
 
           <Autocomplete
-            options={boxeadoresQuery.data?.content ?? []}
+            options={opciones}
             value={boxeador}
             onChange={(_event, value) => setBoxeador(value)}
-            filterOptions={filtrarBoxeadores}
+            inputValue={esOrganizador ? busqueda : undefined}
+            onInputChange={esOrganizador ? (_event, value) => setBusqueda(value) : undefined}
+            filterOptions={esOrganizador ? (x) => x : filtrarBoxeadores}
             getOptionLabel={(option) => option.nombre}
             isOptionEqualToValue={(option, value) => option.id === value.id}
-            disabled={!gimnasioSeleccionado}
-            noOptionsText="Sin resultados"
+            disabled={!esOrganizador && !gimnasioSeleccionado}
+            loading={esOrganizador && busquedaGlobalQuery.isFetching}
+            noOptionsText={
+              esOrganizador && busquedaDebounced.trim().length < 2
+                ? 'Escribe al menos 2 letras'
+                : 'Sin resultados'
+            }
             renderOption={(props, option) => (
               <li {...props} key={option.id}>
-                <Stack spacing={0}>
-                  <span>
-                    {option.nombre} {option.categoriaNombre ? `(${option.categoriaNombre})` : ''}
-                  </span>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
-                    {option.id}
-                  </Typography>
-                </Stack>
+                <BoxeadorOption option={option} />
               </li>
             )}
             renderInput={(params) => (
@@ -107,7 +150,9 @@ export function InscribirBoxeadorDialog({ eventoId, open, onClose }: Props) {
                 label="Boxeador"
                 placeholder="Busca por nombre o pega el ID"
                 helperText={
-                  gimnasioSeleccionado && boxeadoresQuery.data?.content.length === 0
+                  !esOrganizador &&
+                  gimnasioSeleccionado &&
+                  boxeadoresDeMiGimnasioQuery.data?.content.length === 0
                     ? 'Este gimnasio no tiene boxeadores registrados'
                     : undefined
                 }
