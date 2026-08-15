@@ -27,8 +27,8 @@ export function HeroSection() {
         overflow: 'hidden',
         borderBottom: '1px solid',
         borderColor: 'divider',
-        background:
-          'radial-gradient(circle at 82% 25%, rgba(214,40,40,0.22), transparent 55%), radial-gradient(circle at 15% 85%, rgba(201,162,39,0.10), transparent 45%), #0B0B0D',
+        background: (theme) =>
+          `radial-gradient(circle at 82% 25%, rgba(214,40,40,0.22), transparent 55%), radial-gradient(circle at 15% 85%, rgba(201,162,39,0.10), transparent 45%), ${theme.palette.background.default}`,
       }}
     >
       <Container maxWidth="lg" sx={{ py: { xs: 8, md: 12 } }}>
@@ -96,8 +96,10 @@ export function HeroSection() {
                 borderRadius: 1,
                 border: '1px solid',
                 borderColor: 'divider',
-                background:
-                  'linear-gradient(155deg, #1a1a1f 0%, #0B0B0D 55%, #1c0f0f 100%)',
+                background: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'linear-gradient(155deg, #1a1a1f 0%, #0B0B0D 55%, #1c0f0f 100%)'
+                    : `linear-gradient(155deg, ${theme.palette.grey[100]} 0%, ${theme.palette.background.paper} 55%, #FBEAEA 100%)`,
                 overflow: 'hidden',
                 display: 'flex',
                 alignItems: 'flex-end',
@@ -128,7 +130,8 @@ export function HeroSection() {
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
                   fontSize: { xs: 140, md: 180 },
-                  color: 'rgba(245,245,245,0.06)',
+                  color: (theme) =>
+                    theme.palette.mode === 'dark' ? 'rgba(245,245,245,0.06)' : 'rgba(0,0,0,0.05)',
                 }}
               />
               <Box sx={{ position: 'relative', p: { xs: 3, md: 4 } }}>

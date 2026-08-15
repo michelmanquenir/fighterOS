@@ -5,21 +5,18 @@ import '@fontsource/inter/700.css'
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import CssBaseline from '@mui/material/CssBaseline'
-import { ThemeProvider } from '@mui/material/styles'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 import { AuthProvider } from './auth/AuthContext.tsx'
 import './index.css'
-import { theme } from './theme/theme.ts'
+import { ColorModeProvider } from './theme/ColorModeContext.tsx'
 
 const queryClient = new QueryClient()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <ColorModeProvider>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <AuthProvider>
@@ -27,6 +24,6 @@ createRoot(document.getElementById('root')!).render(
           </AuthProvider>
         </BrowserRouter>
       </QueryClientProvider>
-    </ThemeProvider>
+    </ColorModeProvider>
   </StrictMode>,
 )

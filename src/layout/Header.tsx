@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import DarkModeIcon from '@mui/icons-material/DarkMode'
+import LightModeIcon from '@mui/icons-material/LightMode'
 import MenuIcon from '@mui/icons-material/Menu'
 import SportsMmaIcon from '@mui/icons-material/SportsMma'
 import AppBar from '@mui/material/AppBar'
@@ -11,12 +13,14 @@ import Drawer from '@mui/material/Drawer'
 import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Toolbar from '@mui/material/Toolbar'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useQuery } from '@tanstack/react-query'
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import { obtenerMe } from '../api/usuarios'
 import { hasRole } from '../auth/roles'
 import { useAuth } from '../auth/useAuth'
+import { useColorMode } from '../theme/useColorMode'
 
 const NAV_LINKS = [
   { to: '/', label: 'Inicio' },
@@ -26,6 +30,7 @@ const NAV_LINKS = [
 
 export function Header() {
   const { auth, logout } = useAuth()
+  const { mode, toggleMode } = useColorMode()
   const navigate = useNavigate()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -103,6 +108,12 @@ export function Header() {
 
           <Box sx={{ flexGrow: { xs: 1, sm: 0 } }} />
 
+          <Tooltip title={mode === 'dark' ? 'Tema claro' : 'Tema oscuro'}>
+            <IconButton onClick={toggleMode} sx={{ display: { xs: 'none', sm: 'inline-flex' } }} aria-label="Cambiar tema">
+              {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+          </Tooltip>
+
           <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', display: { xs: 'none', sm: 'flex' } }}>
             {auth ? (
               <>
@@ -132,6 +143,14 @@ export function Header() {
               </>
             )}
           </Stack>
+
+          <IconButton
+            onClick={toggleMode}
+            sx={{ display: { xs: 'inline-flex', sm: 'none' } }}
+            aria-label="Cambiar tema"
+          >
+            {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+          </IconButton>
 
           <IconButton
             onClick={() => setMenuOpen(true)}

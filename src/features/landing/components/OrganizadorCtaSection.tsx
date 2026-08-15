@@ -54,7 +54,10 @@ export function OrganizadorCtaSection() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'linear-gradient(135deg, #1c0f0f, #0B0B0D)',
+                background: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'linear-gradient(135deg, #1c0f0f, #0B0B0D)'
+                    : `linear-gradient(135deg, #FBEAEA, ${theme.palette.background.default})`,
                 border: '1px solid',
                 borderColor: 'divider',
               }}
