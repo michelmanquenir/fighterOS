@@ -52,7 +52,7 @@ export function Header() {
   }
 
   return (
-    <AppBar position="sticky" sx={{ top: 0 }}>
+    <AppBar position="sticky" color="transparent" sx={{ top: 0 }}>
       <Container maxWidth={false} sx={{ px: { xs: 2, md: 4 } }}>
         <Toolbar disableGutters sx={{ gap: { xs: 1, md: 4 }, py: 1 }}>
           <Stack
