@@ -19,10 +19,11 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { dejarDeSeguir, obtenerEstado, seguir } from '../../../api/seguidores'
+import { dejarDeSeguir, listarMisSeguidores, listarMisSeguidos, obtenerEstado, seguir } from '../../../api/seguidores'
 import type { BoxeadorPerfilResponse, EstadoDeportivoEnum } from '../../../api/types'
 import { useAuth } from '../../../auth/useAuth'
 import { FotoUploadButton } from './FotoUploadButton'
+import { SeguidoresListDialog } from './SeguidoresListDialog'
 
 function IdConCopia({ id }: { id: string }) {
   const [copiado, setCopiado] = useState(false)
@@ -48,6 +49,55 @@ function IdConCopia({ id }: { id: string }) {
         </IconButton>
       </Tooltip>
     </Stack>
+  )
+}
+
+function SeguidoresStats() {
+  const [dialogo, setDialogo] = useState<'seguidores' | 'seguidos' | null>(null)
+
+  const seguidoresQuery = useQuery({ queryKey: ['seguidores', 'mis-seguidores'], queryFn: listarMisSeguidores })
+  const seguidosQuery = useQuery({ queryKey: ['seguidores', 'mis-seguidos'], queryFn: listarMisSeguidos })
+
+  return (
+    <>
+      <Stack direction="row" spacing={2}>
+        <Typography
+          component="button"
+          onClick={() => setDialogo('seguidores')}
+          sx={{
+            font: 'inherit',
+            color: 'text.primary',
+            background: 'none',
+            border: 'none',
+            p: 0,
+            cursor: 'pointer',
+            '&:hover': { textDecoration: 'underline' },
+          }}
+        >
+          <strong>{seguidoresQuery.data?.length ?? 0}</strong> seguidores
+        </Typography>
+        <Typography
+          component="button"
+          onClick={() => setDialogo('seguidos')}
+          sx={{
+            font: 'inherit',
+            color: 'text.primary',
+            background: 'none',
+            border: 'none',
+            p: 0,
+            cursor: 'pointer',
+            '&:hover': { textDecoration: 'underline' },
+          }}
+        >
+          <strong>{seguidosQuery.data?.length ?? 0}</strong> seguidos
+        </Typography>
+      </Stack>
+      <SeguidoresListDialog
+        tipo={dialogo ?? 'seguidores'}
+        open={dialogo !== null}
+        onClose={() => setDialogo(null)}
+      />
+    </>
   )
 }
 
@@ -186,7 +236,12 @@ export function PerfilHero({ boxeador, esPropio, pesoMax, onEditar }: PerfilHero
 
       <Stack spacing={1.5} sx={{ flexGrow: 1 }}>
         <Typography variant="h1">{boxeador.nombre}</Typography>
-        {esPropio && <IdConCopia id={boxeador.id} />}
+        {esPropio && (
+          <>
+            <IdConCopia id={boxeador.id} />
+            <SeguidoresStats />
+          </>
+        )}
 
         <Stack direction="row" spacing={1} sx={{ alignItems: 'baseline', flexWrap: 'wrap' }}>
           {boxeador.pesoActual != null && (

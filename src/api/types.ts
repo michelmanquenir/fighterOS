@@ -274,6 +274,13 @@ export interface SolicitudSeguimientoResponse {
   fecha: string
 }
 
+export interface SeguidorPerfilResponse {
+  usuarioId: string
+  nombre: string
+  avatarUrl: string | null
+  esBoxeador: boolean
+}
+
 export interface PesoPactadoResponse {
   id: string
   pesoPactado: number
