@@ -12,6 +12,7 @@ import { useAuth } from '../auth/useAuth'
 import { EditarEventoDialog } from '../features/eventos/components/EditarEventoDialog'
 import { EstadoEventoChip } from '../features/eventos/components/EstadoEventoChip'
 import { InscripcionesEventoCard } from '../features/eventos/components/InscripcionesEventoCard'
+import { TorneosEventoCard } from '../features/eventos/components/TorneosEventoCard'
 
 const TIPO_LABEL: Record<string, string> = {
   torneo: 'Torneo',
@@ -95,6 +96,12 @@ export function EventoDetallePage() {
           )}
         </Stack>
       </Grid>
+
+      {esOrganizador && (
+        <Grid size={12}>
+          <TorneosEventoCard eventoId={evento.id} />
+        </Grid>
+      )}
 
       <Grid size={12}>
         <InscripcionesEventoCard eventoId={evento.id} esOrganizador={esOrganizador} />

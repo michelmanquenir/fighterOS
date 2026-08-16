@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { listar as listarBoxeadores } from '../../../api/boxeadores'
 import { extraerMensajeError } from '../../../api/errors'
-import { inscribirBoxeador } from '../../../api/eventos'
+import { inscribirBoxeador, listarTorneos } from '../../../api/eventos'
 import { obtenerMisGimnasios } from '../../../api/gimnasios'
 import type { BoxeadorResumenResponse } from '../../../api/types'
 
@@ -46,9 +46,16 @@ interface Props {
 export function InscribirBoxeadorDialog({ eventoId, esOrganizador, open, onClose }: Props) {
   const [gimnasioId, setGimnasioId] = useState('')
   const [boxeador, setBoxeador] = useState<BoxeadorResumenResponse | null>(null)
+  const [torneoId, setTorneoId] = useState('')
   const [busqueda, setBusqueda] = useState('')
   const busquedaDebounced = useDebounced(busqueda, 300)
   const queryClient = useQueryClient()
+
+  const torneosQuery = useQuery({
+    queryKey: ['eventos', eventoId, 'torneos'],
+    queryFn: () => listarTorneos(eventoId),
+    enabled: open,
+  })
 
   const gimnasiosQuery = useQuery({
     queryKey: ['gimnasios', 'mios'],
@@ -75,11 +82,14 @@ export function InscribirBoxeadorDialog({ eventoId, esOrganizador, open, onClose
     : (boxeadoresDeMiGimnasioQuery.data?.content ?? [])
 
   const mutation = useMutation({
-    mutationFn: () => inscribirBoxeador(eventoId, { boxeadorId: boxeador!.id }),
+    mutationFn: () =>
+      inscribirBoxeador(eventoId, { boxeadorId: boxeador!.id, torneoId: torneoId || undefined }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['eventos', eventoId, 'inscripciones'] })
+      queryClient.invalidateQueries({ queryKey: ['eventos', eventoId, 'torneos'] })
       setBoxeador(null)
       setBusqueda('')
+      setTorneoId('')
       onClose()
     },
   })
@@ -160,6 +170,17 @@ export function InscribirBoxeadorDialog({ eventoId, esOrganizador, open, onClose
               />
             )}
           />
+
+          {torneosQuery.data && torneosQuery.data.length > 0 && (
+            <TextField select fullWidth label="Torneo (opcional)" value={torneoId} onChange={(e) => setTorneoId(e.target.value)}>
+              <MenuItem value="">Sin asignar todavía</MenuItem>
+              {torneosQuery.data.map((torneo) => (
+                <MenuItem key={torneo.id} value={torneo.id}>
+                  {torneo.nombre}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
 
           {mutation.isError && (
             <Alert severity="error">

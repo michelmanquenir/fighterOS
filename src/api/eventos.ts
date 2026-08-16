@@ -5,6 +5,8 @@ import type {
   EventoInscripcionCreateRequest,
   EventoInscripcionResponse,
   EventoResponse,
+  EventoTorneoCreateRequest,
+  EventoTorneoResponse,
   EventoUpdateRequest,
   Page,
 } from './types'
@@ -63,4 +65,33 @@ export async function inscribirBoxeador(
 
 export async function retirarInscripcion(eventoId: string, boxeadorId: string): Promise<void> {
   await apiClient.delete(`/api/eventos/${eventoId}/inscripciones/${boxeadorId}`)
+}
+
+export async function asignarTorneo(
+  eventoId: string,
+  boxeadorId: string,
+  torneoId: string | null,
+): Promise<EventoInscripcionResponse> {
+  const { data } = await apiClient.put<EventoInscripcionResponse>(
+    `/api/eventos/${eventoId}/inscripciones/${boxeadorId}/torneo`,
+    { torneoId },
+  )
+  return data
+}
+
+export async function listarTorneos(eventoId: string): Promise<EventoTorneoResponse[]> {
+  const { data } = await apiClient.get<EventoTorneoResponse[]>(`/api/eventos/${eventoId}/torneos`)
+  return data
+}
+
+export async function crearTorneo(
+  eventoId: string,
+  request: EventoTorneoCreateRequest,
+): Promise<EventoTorneoResponse> {
+  const { data } = await apiClient.post<EventoTorneoResponse>(`/api/eventos/${eventoId}/torneos`, request)
+  return data
+}
+
+export async function eliminarTorneo(eventoId: string, torneoId: string): Promise<void> {
+  await apiClient.delete(`/api/eventos/${eventoId}/torneos/${torneoId}`)
 }

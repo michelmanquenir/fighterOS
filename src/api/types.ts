@@ -377,11 +377,27 @@ export interface EventoInscripcionResponse {
   categoriaNombre: string | null
   gimnasioId: string
   gimnasioNombre: string
+  torneoId: string | null
+  torneoNombre: string | null
   fecha: string
 }
 
 export interface EventoInscripcionCreateRequest {
   boxeadorId: string
+  torneoId?: string
+}
+
+export interface EventoTorneoResponse {
+  id: string
+  nombre: string
+  categoriaId: string | null
+  categoriaNombre: string | null
+  cantidadInscritos: number
+}
+
+export interface EventoTorneoCreateRequest {
+  nombre: string
+  categoriaId?: string
 }
 
 export interface EventoFiltros {
