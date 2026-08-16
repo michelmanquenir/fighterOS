@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import DeleteIcon from '@mui/icons-material/Delete'
+import JoinFullIcon from '@mui/icons-material/JoinFull'
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1'
 import Avatar from '@mui/material/Avatar'
 import Button from '@mui/material/Button'
@@ -17,6 +18,7 @@ import { Link as RouterLink } from 'react-router-dom'
 import { listarInscripciones, retirarInscripcion } from '../../../api/eventos'
 import { obtenerMisGimnasios } from '../../../api/gimnasios'
 import { useAuth } from '../../../auth/useAuth'
+import { EmparejamientoDialog } from './EmparejamientoDialog'
 import { InscribirBoxeadorDialog } from './InscribirBoxeadorDialog'
 
 interface Props {
@@ -27,6 +29,7 @@ interface Props {
 export function InscripcionesEventoCard({ eventoId, esOrganizador }: Props) {
   const { auth } = useAuth()
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [emparejamientoOpen, setEmparejamientoOpen] = useState(false)
   const queryClient = useQueryClient()
 
   const inscripcionesQuery = useQuery({
@@ -52,18 +55,31 @@ export function InscripcionesEventoCard({ eventoId, esOrganizador }: Props) {
   return (
     <Card>
       <CardContent>
-        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
           <Typography variant="h5">Peleadores inscritos</Typography>
-          {((misGimnasiosQuery.data && misGimnasiosQuery.data.length > 0) || esOrganizador) && (
-            <Button
-              size="small"
-              variant="outlined"
-              startIcon={<PersonAddAlt1Icon />}
-              onClick={() => setDialogOpen(true)}
-            >
-              Inscribir peleador
-            </Button>
-          )}
+          <Stack direction="row" spacing={1}>
+            {esOrganizador && inscripciones.length >= 2 && (
+              <Button
+                size="small"
+                variant="outlined"
+                color="secondary"
+                startIcon={<JoinFullIcon />}
+                onClick={() => setEmparejamientoOpen(true)}
+              >
+                Emparejamientos
+              </Button>
+            )}
+            {((misGimnasiosQuery.data && misGimnasiosQuery.data.length > 0) || esOrganizador) && (
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<PersonAddAlt1Icon />}
+                onClick={() => setDialogOpen(true)}
+              >
+                Inscribir peleador
+              </Button>
+            )}
+          </Stack>
         </Stack>
 
         {inscripciones.length === 0 ? (
@@ -125,6 +141,11 @@ export function InscripcionesEventoCard({ eventoId, esOrganizador }: Props) {
         esOrganizador={esOrganizador}
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
+      />
+      <EmparejamientoDialog
+        inscritos={inscripciones}
+        open={emparejamientoOpen}
+        onClose={() => setEmparejamientoOpen(false)}
       />
     </Card>
   )

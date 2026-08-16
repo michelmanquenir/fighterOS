@@ -204,6 +204,26 @@ export interface EstadisticasResponse {
   ultimaPelea: string | null
 }
 
+export interface CompatibilidadResponse {
+  boxeadorAId: string
+  boxeadorANombre: string
+  boxeadorBId: string
+  boxeadorBNombre: string
+  puntajeGeneral: number
+  puntajePeso: number
+  pesoA: number | null
+  pesoB: number | null
+  mismaCategoria: boolean
+  categoriaANombre: string | null
+  categoriaBNombre: string | null
+  puntajeExperiencia: number
+  peleasA: number
+  peleasB: number
+  puntajeNivel: number
+  nivelANombre: NivelProgresionEnum
+  nivelBNombre: NivelProgresionEnum
+}
+
 export type ResultadoBoxeador = 'victoria' | 'derrota' | 'empate' | 'no_contest' | 'cancelada'
 
 export interface PeleaResumenResponse {

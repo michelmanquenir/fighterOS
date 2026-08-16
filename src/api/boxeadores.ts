@@ -5,6 +5,7 @@ import type {
   BoxeadorResumenResponse,
   BoxeadorUpdateRequest,
   CampeonatoResponse,
+  CompatibilidadResponse,
   CopaResponse,
   EstadisticasResponse,
   MedallaResponse,
@@ -29,6 +30,13 @@ export async function listar(
 
 export async function obtenerPerfil(id: string): Promise<BoxeadorPerfilResponse> {
   const { data } = await apiClient.get<BoxeadorPerfilResponse>(`/api/boxeadores/${id}`)
+  return data
+}
+
+export async function comparar(aId: string, bId: string): Promise<CompatibilidadResponse> {
+  const { data } = await apiClient.get<CompatibilidadResponse>('/api/boxeadores/comparar', {
+    params: { aId, bId },
+  })
   return data
 }
 
