@@ -1,5 +1,9 @@
 import { useState } from 'react'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import HandshakeIcon from '@mui/icons-material/Handshake'
+import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
@@ -10,8 +14,10 @@ import MenuItem from '@mui/material/MenuItem'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { comparar } from '../../../api/boxeadores'
+import { extraerMensajeError } from '../../../api/errors'
+import { pactarPelea } from '../../../api/eventos'
 import type { EventoInscripcionResponse, NivelProgresionEnum } from '../../../api/types'
 
 const NIVEL_LABEL: Record<NivelProgresionEnum, string> = {
@@ -48,14 +54,16 @@ function FactorRow({ label, detalle, puntaje }: { label: string; detalle: string
 }
 
 interface Props {
+  eventoId: string
   inscritos: EventoInscripcionResponse[]
   open: boolean
   onClose: () => void
 }
 
-export function EmparejamientoDialog({ inscritos, open, onClose }: Props) {
+export function EmparejamientoDialog({ eventoId, inscritos, open, onClose }: Props) {
   const [aId, setAId] = useState('')
   const [bId, setBId] = useState('')
+  const queryClient = useQueryClient()
 
   const query = useQuery({
     queryKey: ['boxeadores', 'comparar', aId, bId],
@@ -64,6 +72,20 @@ export function EmparejamientoDialog({ inscritos, open, onClose }: Props) {
   })
 
   const resultado = aId && bId && aId !== bId ? query.data : undefined
+
+  const inscripcionA = inscritos.find((i) => i.boxeadorId === aId)
+  const inscripcionB = inscritos.find((i) => i.boxeadorId === bId)
+  const torneoComun =
+    inscripcionA?.torneoId && inscripcionA.torneoId === inscripcionB?.torneoId ? inscripcionA.torneoId : undefined
+
+  const pactarMutation = useMutation({
+    mutationFn: () => pactarPelea(eventoId, { boxeadorAId: aId, boxeadorBId: bId, torneoId: torneoComun }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['eventos', eventoId, 'peleas'] })
+      setAId('')
+      setBId('')
+    },
+  })
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
@@ -76,7 +98,16 @@ export function EmparejamientoDialog({ inscritos, open, onClose }: Props) {
 
           <Grid container spacing={2}>
             <Grid size={6}>
-              <TextField select fullWidth label="Peleador 1" value={aId} onChange={(e) => setAId(e.target.value)}>
+              <TextField
+                select
+                fullWidth
+                label="Peleador 1"
+                value={aId}
+                onChange={(e) => {
+                  setAId(e.target.value)
+                  pactarMutation.reset()
+                }}
+              >
                 <MenuItem value="">Selecciona</MenuItem>
                 {inscritos.map((i) => (
                   <MenuItem key={i.boxeadorId} value={i.boxeadorId} disabled={i.boxeadorId === bId}>
@@ -86,7 +117,16 @@ export function EmparejamientoDialog({ inscritos, open, onClose }: Props) {
               </TextField>
             </Grid>
             <Grid size={6}>
-              <TextField select fullWidth label="Peleador 2" value={bId} onChange={(e) => setBId(e.target.value)}>
+              <TextField
+                select
+                fullWidth
+                label="Peleador 2"
+                value={bId}
+                onChange={(e) => {
+                  setBId(e.target.value)
+                  pactarMutation.reset()
+                }}
+              >
                 <MenuItem value="">Selecciona</MenuItem>
                 {inscritos.map((i) => (
                   <MenuItem key={i.boxeadorId} value={i.boxeadorId} disabled={i.boxeadorId === aId}>
@@ -133,6 +173,27 @@ export function EmparejamientoDialog({ inscritos, open, onClose }: Props) {
                 puntaje={resultado.puntajeNivel}
                 detalle={`${NIVEL_LABEL[resultado.nivelANombre]} vs ${NIVEL_LABEL[resultado.nivelBNombre]}`}
               />
+
+              {pactarMutation.isSuccess ? (
+                <Alert icon={<CheckCircleIcon fontSize="inherit" />} severity="success">
+                  Pelea pactada. Puedes seguir armando más cruces.
+                </Alert>
+              ) : (
+                <Button
+                  variant="contained"
+                  startIcon={<HandshakeIcon />}
+                  disabled={pactarMutation.isPending}
+                  onClick={() => pactarMutation.mutate()}
+                >
+                  {pactarMutation.isPending ? 'Pactando...' : 'Pactar pelea'}
+                </Button>
+              )}
+
+              {pactarMutation.isError && (
+                <Alert severity="error">
+                  {extraerMensajeError(pactarMutation.error, 'No se pudo pactar la pelea.')}
+                </Alert>
+              )}
             </Stack>
           )}
         </Stack>

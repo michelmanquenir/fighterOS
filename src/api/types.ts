@@ -405,3 +405,25 @@ export interface EventoFiltros {
   tipo?: TipoEventoEnum
   estado?: EstadoEventoEnum
 }
+
+export interface EventoPeleaResponse {
+  id: string
+  boxeadorAId: string
+  boxeadorANombre: string
+  boxeadorAFotoUrl: string | null
+  boxeadorBId: string
+  boxeadorBNombre: string
+  boxeadorBFotoUrl: string | null
+  categoriaNombre: string | null
+  torneoId: string | null
+  torneoNombre: string | null
+  ronda: number
+  estado: EstadoPeleaEnum
+}
+
+export interface EventoPeleaCreateRequest {
+  boxeadorAId: string
+  boxeadorBId: string
+  torneoId?: string
+  ronda?: number
+}

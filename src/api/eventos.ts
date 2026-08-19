@@ -4,6 +4,8 @@ import type {
   EventoFiltros,
   EventoInscripcionCreateRequest,
   EventoInscripcionResponse,
+  EventoPeleaCreateRequest,
+  EventoPeleaResponse,
   EventoResponse,
   EventoTorneoCreateRequest,
   EventoTorneoResponse,
@@ -94,4 +96,21 @@ export async function crearTorneo(
 
 export async function eliminarTorneo(eventoId: string, torneoId: string): Promise<void> {
   await apiClient.delete(`/api/eventos/${eventoId}/torneos/${torneoId}`)
+}
+
+export async function listarPeleas(eventoId: string): Promise<EventoPeleaResponse[]> {
+  const { data } = await apiClient.get<EventoPeleaResponse[]>(`/api/eventos/${eventoId}/peleas`)
+  return data
+}
+
+export async function pactarPelea(
+  eventoId: string,
+  request: EventoPeleaCreateRequest,
+): Promise<EventoPeleaResponse> {
+  const { data } = await apiClient.post<EventoPeleaResponse>(`/api/eventos/${eventoId}/peleas`, request)
+  return data
+}
+
+export async function eliminarPelea(eventoId: string, peleaId: string): Promise<void> {
+  await apiClient.delete(`/api/eventos/${eventoId}/peleas/${peleaId}`)
 }

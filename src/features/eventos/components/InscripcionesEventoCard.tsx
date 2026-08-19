@@ -221,6 +221,7 @@ export function InscripcionesEventoCard({ eventoId, esOrganizador }: Props) {
         onClose={() => setDialogOpen(false)}
       />
       <EmparejamientoDialog
+        eventoId={eventoId}
         inscritos={inscripciones}
         open={emparejamientoOpen}
         onClose={() => setEmparejamientoOpen(false)}

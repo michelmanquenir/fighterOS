@@ -2,6 +2,7 @@ import { useState } from 'react'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
+import AccountTreeIcon from '@mui/icons-material/AccountTree'
 import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -22,7 +23,9 @@ import Typography from '@mui/material/Typography'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { listarCategoriasPeso } from '../../../api/catalogos'
 import { extraerMensajeError } from '../../../api/errors'
-import { crearTorneo, eliminarTorneo, listarTorneos } from '../../../api/eventos'
+import { crearTorneo, eliminarTorneo, listarInscripciones, listarTorneos } from '../../../api/eventos'
+import type { EventoTorneoResponse } from '../../../api/types'
+import { LlaveTorneoDialog } from './LlaveTorneoDialog'
 
 function CrearTorneoDialog({ eventoId, open, onClose }: { eventoId: string; open: boolean; onClose: () => void }) {
   const [nombre, setNombre] = useState('')
@@ -83,11 +86,16 @@ function CrearTorneoDialog({ eventoId, open, onClose }: { eventoId: string; open
 
 export function TorneosEventoCard({ eventoId }: { eventoId: string }) {
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [torneoLlave, setTorneoLlave] = useState<EventoTorneoResponse | null>(null)
   const queryClient = useQueryClient()
 
   const query = useQuery({
     queryKey: ['eventos', eventoId, 'torneos'],
     queryFn: () => listarTorneos(eventoId),
+  })
+  const inscripcionesQuery = useQuery({
+    queryKey: ['eventos', eventoId, 'inscripciones'],
+    queryFn: () => listarInscripciones(eventoId),
   })
 
   const eliminarMutation = useMutation({
@@ -122,15 +130,20 @@ export function TorneosEventoCard({ eventoId }: { eventoId: string }) {
                 divider
                 sx={{ px: 0 }}
                 secondaryAction={
-                  <IconButton
-                    edge="end"
-                    size="small"
-                    disabled={eliminarMutation.isPending}
-                    onClick={() => eliminarMutation.mutate(torneo.id)}
-                    aria-label="Eliminar torneo"
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
+                  <Stack direction="row" spacing={0.5}>
+                    <IconButton size="small" onClick={() => setTorneoLlave(torneo)} aria-label="Ver llave">
+                      <AccountTreeIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      size="small"
+                      disabled={eliminarMutation.isPending}
+                      onClick={() => eliminarMutation.mutate(torneo.id)}
+                      aria-label="Eliminar torneo"
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Stack>
                 }
               >
                 <ListItemIcon sx={{ minWidth: 36, color: 'secondary.main' }}>
@@ -152,6 +165,16 @@ export function TorneosEventoCard({ eventoId }: { eventoId: string }) {
       </CardContent>
 
       <CrearTorneoDialog eventoId={eventoId} open={dialogOpen} onClose={() => setDialogOpen(false)} />
+
+      {torneoLlave && (
+        <LlaveTorneoDialog
+          eventoId={eventoId}
+          torneo={torneoLlave}
+          inscritosDelTorneo={(inscripcionesQuery.data ?? []).filter((i) => i.torneoId === torneoLlave.id)}
+          open={!!torneoLlave}
+          onClose={() => setTorneoLlave(null)}
+        />
+      )}
     </Card>
   )
 }
