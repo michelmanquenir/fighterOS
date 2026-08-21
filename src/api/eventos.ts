@@ -6,6 +6,7 @@ import type {
   EventoInscripcionResponse,
   EventoPeleaCreateRequest,
   EventoPeleaResponse,
+  EventoPeleaResultadoRequest,
   EventoResponse,
   EventoTorneoCreateRequest,
   EventoTorneoResponse,
@@ -113,4 +114,16 @@ export async function pactarPelea(
 
 export async function eliminarPelea(eventoId: string, peleaId: string): Promise<void> {
   await apiClient.delete(`/api/eventos/${eventoId}/peleas/${peleaId}`)
+}
+
+export async function registrarResultadoPelea(
+  eventoId: string,
+  peleaId: string,
+  request: EventoPeleaResultadoRequest,
+): Promise<EventoPeleaResponse> {
+  const { data } = await apiClient.put<EventoPeleaResponse>(
+    `/api/eventos/${eventoId}/peleas/${peleaId}/resultado`,
+    request,
+  )
+  return data
 }

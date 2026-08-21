@@ -6,6 +6,7 @@ import Alert from '@mui/material/Alert'
 import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import ButtonBase from '@mui/material/ButtonBase'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
@@ -16,10 +17,11 @@ import MenuItem from '@mui/material/MenuItem'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { extraerMensajeError } from '../../../api/errors'
-import { eliminarPelea, listarPeleas, pactarPelea } from '../../../api/eventos'
+import { eliminarPelea, listarPeleas, pactarPelea, registrarResultadoPelea } from '../../../api/eventos'
 import type { EventoInscripcionResponse, EventoPeleaResponse, EventoTorneoResponse } from '../../../api/types'
 
 interface Props {
@@ -31,24 +33,57 @@ interface Props {
 }
 
 function FighterRow({
+  boxeadorId,
   nombre,
   fotoUrl,
+  esGanador,
+  atenuado,
+  disabled,
+  onClick,
 }: {
+  boxeadorId: string
   nombre: string
   fotoUrl: string | null
+  esGanador: boolean
+  atenuado: boolean
+  disabled: boolean
+  onClick: (boxeadorId: string) => void
 }) {
   return (
-    <Stack direction="row" spacing={1} sx={{ alignItems: 'center', px: 1.25, py: 1 }}>
-      <Avatar src={fotoUrl ?? undefined} sx={{ width: 26, height: 26, fontSize: '0.8rem' }}>
-        {nombre.charAt(0)}
-      </Avatar>
-      <Typography
-        variant="body2"
-        sx={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+    <Tooltip title={esGanador ? 'Quitar como ganador' : 'Marcar como ganador'}>
+      <ButtonBase
+        onClick={() => onClick(boxeadorId)}
+        disabled={disabled}
+        sx={{
+          width: '100%',
+          justifyContent: 'flex-start',
+          px: 1.25,
+          py: 1,
+          gap: 1,
+          bgcolor: esGanador ? 'action.selected' : 'transparent',
+          opacity: atenuado ? 0.45 : 1,
+          transition: 'background-color 0.15s, opacity 0.15s',
+        }}
       >
-        {nombre}
-      </Typography>
-    </Stack>
+        <Avatar src={fotoUrl ?? undefined} sx={{ width: 26, height: 26, fontSize: '0.8rem' }}>
+          {nombre.charAt(0)}
+        </Avatar>
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 700,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            flexGrow: 1,
+            textAlign: 'left',
+          }}
+        >
+          {nombre}
+        </Typography>
+        {esGanador && <EmojiEventsIcon sx={{ fontSize: 18, color: 'secondary.main' }} />}
+      </ButtonBase>
+    </Tooltip>
   )
 }
 
@@ -56,11 +91,19 @@ function MatchCard({
   pelea,
   puedeEliminar,
   onEliminar,
+  actualizandoResultado,
+  onSeleccionarGanador,
 }: {
   pelea: EventoPeleaResponse
   puedeEliminar: boolean
   onEliminar: () => void
+  actualizandoResultado: boolean
+  onSeleccionarGanador: (ganadorId: string | null) => void
 }) {
+  const manejarClick = (boxeadorId: string) => {
+    onSeleccionarGanador(pelea.ganadorId === boxeadorId ? null : boxeadorId)
+  }
+
   return (
     <Paper
       variant="outlined"
@@ -70,12 +113,29 @@ function MatchCard({
         overflow: 'hidden',
         position: 'relative',
         bgcolor: 'background.paper',
+        borderColor: pelea.ganadorId ? 'secondary.main' : 'divider',
         '&:hover .eliminar-cruce': { opacity: 1 },
       }}
     >
-      <FighterRow nombre={pelea.boxeadorANombre} fotoUrl={pelea.boxeadorAFotoUrl} />
+      <FighterRow
+        boxeadorId={pelea.boxeadorAId}
+        nombre={pelea.boxeadorANombre}
+        fotoUrl={pelea.boxeadorAFotoUrl}
+        esGanador={pelea.ganadorId === pelea.boxeadorAId}
+        atenuado={!!pelea.ganadorId && pelea.ganadorId !== pelea.boxeadorAId}
+        disabled={actualizandoResultado}
+        onClick={manejarClick}
+      />
       <Divider />
-      <FighterRow nombre={pelea.boxeadorBNombre} fotoUrl={pelea.boxeadorBFotoUrl} />
+      <FighterRow
+        boxeadorId={pelea.boxeadorBId}
+        nombre={pelea.boxeadorBNombre}
+        fotoUrl={pelea.boxeadorBFotoUrl}
+        esGanador={pelea.ganadorId === pelea.boxeadorBId}
+        atenuado={!!pelea.ganadorId && pelea.ganadorId !== pelea.boxeadorBId}
+        disabled={actualizandoResultado}
+        onClick={manejarClick}
+      />
       {puedeEliminar && (
         <IconButton
           className="eliminar-cruce"
@@ -126,6 +186,14 @@ export function LlaveTorneoDialog({ eventoId, torneo, inscritosDelTorneo, open, 
 
   const eliminarMutation = useMutation({
     mutationFn: (peleaId: string) => eliminarPelea(eventoId, peleaId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['eventos', eventoId, 'peleas'] })
+    },
+  })
+
+  const resultadoMutation = useMutation({
+    mutationFn: ({ peleaId, ganadorId }: { peleaId: string; ganadorId: string | null }) =>
+      registrarResultadoPelea(eventoId, peleaId, { ganadorId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['eventos', eventoId, 'peleas'] })
     },
@@ -253,6 +321,10 @@ export function LlaveTorneoDialog({ eventoId, torneo, inscritosDelTorneo, open, 
                             pelea={pelea}
                             puedeEliminar={!eliminarMutation.isPending}
                             onEliminar={() => eliminarMutation.mutate(pelea.id)}
+                            actualizandoResultado={resultadoMutation.isPending}
+                            onSeleccionarGanador={(ganadorId) =>
+                              resultadoMutation.mutate({ peleaId: pelea.id, ganadorId })
+                            }
                           />
                         ))
                       )}

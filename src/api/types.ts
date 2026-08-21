@@ -419,6 +419,7 @@ export interface EventoPeleaResponse {
   torneoNombre: string | null
   ronda: number
   estado: EstadoPeleaEnum
+  ganadorId: string | null
 }
 
 export interface EventoPeleaCreateRequest {
@@ -426,4 +427,8 @@ export interface EventoPeleaCreateRequest {
   boxeadorBId: string
   torneoId?: string
   ronda?: number
+}
+
+export interface EventoPeleaResultadoRequest {
+  ganadorId: string | null
 }
