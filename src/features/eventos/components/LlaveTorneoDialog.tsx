@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
+import CloseIcon from '@mui/icons-material/Close'
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
 import Alert from '@mui/material/Alert'
 import Avatar from '@mui/material/Avatar'
+import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
+import Divider from '@mui/material/Divider'
 import Grid from '@mui/material/Grid'
 import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
@@ -17,7 +20,7 @@ import Typography from '@mui/material/Typography'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { extraerMensajeError } from '../../../api/errors'
 import { eliminarPelea, listarPeleas, pactarPelea } from '../../../api/eventos'
-import type { EventoInscripcionResponse, EventoTorneoResponse } from '../../../api/types'
+import type { EventoInscripcionResponse, EventoPeleaResponse, EventoTorneoResponse } from '../../../api/types'
 
 interface Props {
   eventoId: string
@@ -25,6 +28,75 @@ interface Props {
   inscritosDelTorneo: EventoInscripcionResponse[]
   open: boolean
   onClose: () => void
+}
+
+function FighterRow({
+  nombre,
+  fotoUrl,
+}: {
+  nombre: string
+  fotoUrl: string | null
+}) {
+  return (
+    <Stack direction="row" spacing={1} sx={{ alignItems: 'center', px: 1.25, py: 1 }}>
+      <Avatar src={fotoUrl ?? undefined} sx={{ width: 26, height: 26, fontSize: '0.8rem' }}>
+        {nombre.charAt(0)}
+      </Avatar>
+      <Typography
+        variant="body2"
+        sx={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+      >
+        {nombre}
+      </Typography>
+    </Stack>
+  )
+}
+
+function MatchCard({
+  pelea,
+  puedeEliminar,
+  onEliminar,
+}: {
+  pelea: EventoPeleaResponse
+  puedeEliminar: boolean
+  onEliminar: () => void
+}) {
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        width: 220,
+        borderRadius: 1.5,
+        overflow: 'hidden',
+        position: 'relative',
+        bgcolor: 'background.paper',
+        '&:hover .eliminar-cruce': { opacity: 1 },
+      }}
+    >
+      <FighterRow nombre={pelea.boxeadorANombre} fotoUrl={pelea.boxeadorAFotoUrl} />
+      <Divider />
+      <FighterRow nombre={pelea.boxeadorBNombre} fotoUrl={pelea.boxeadorBFotoUrl} />
+      {puedeEliminar && (
+        <IconButton
+          className="eliminar-cruce"
+          size="small"
+          onClick={onEliminar}
+          aria-label="Eliminar cruce"
+          sx={{
+            position: 'absolute',
+            top: 2,
+            right: 2,
+            opacity: 0,
+            transition: 'opacity 0.15s',
+            bgcolor: 'background.default',
+            '&:hover': { bgcolor: 'background.default' },
+          }}
+        >
+          <CloseIcon sx={{ fontSize: 14 }} />
+        </IconButton>
+      )}
+    </Paper>
+  )
 }
 
 export function LlaveTorneoDialog({ eventoId, torneo, inscritosDelTorneo, open, onClose }: Props) {
@@ -41,6 +113,7 @@ export function LlaveTorneoDialog({ eventoId, torneo, inscritosDelTorneo, open, 
 
   const peleasDelTorneo = (peleasQuery.data ?? []).filter((p) => p.torneoId === torneo.id)
   const rondas = Array.from(new Set([1, ...peleasDelTorneo.map((p) => p.ronda)])).sort((a, b) => a - b)
+  const ultimaRonda = rondas[rondas.length - 1]
 
   const pactarMutation = useMutation({
     mutationFn: () => pactarPelea(eventoId, { boxeadorAId: aId, boxeadorBId: bId, torneoId: torneo.id, ronda }),
@@ -59,14 +132,17 @@ export function LlaveTorneoDialog({ eventoId, torneo, inscritosDelTorneo, open, 
   })
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Llave: {torneo.nombre}</DialogTitle>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <EmojiEventsIcon color="secondary" />
+        {torneo.nombre}
+      </DialogTitle>
       <DialogContent>
         <Stack spacing={3} sx={{ pt: 1 }}>
           <Stack spacing={1.5}>
             <Typography variant="subtitle2">Agregar cruce</Typography>
             <Grid container spacing={1.5}>
-              <Grid size={3}>
+              <Grid size={{ xs: 6, sm: 2 }}>
                 <TextField
                   select
                   fullWidth
@@ -82,7 +158,7 @@ export function LlaveTorneoDialog({ eventoId, torneo, inscritosDelTorneo, open, 
                   ))}
                 </TextField>
               </Grid>
-              <Grid size={4.5}>
+              <Grid size={{ xs: 12, sm: 5 }}>
                 <TextField
                   select
                   fullWidth
@@ -99,7 +175,7 @@ export function LlaveTorneoDialog({ eventoId, torneo, inscritosDelTorneo, open, 
                   ))}
                 </TextField>
               </Grid>
-              <Grid size={4.5}>
+              <Grid size={{ xs: 12, sm: 5 }}>
                 <TextField
                   select
                   fullWidth
@@ -131,57 +207,61 @@ export function LlaveTorneoDialog({ eventoId, torneo, inscritosDelTorneo, open, 
             )}
           </Stack>
 
-          <Stack spacing={2.5}>
-            {rondas.map((r) => {
-              const cruces = peleasDelTorneo.filter((p) => p.ronda === r)
-              if (cruces.length === 0) return null
-              return (
-                <Stack key={r} spacing={1}>
-                  <Typography variant="overline" color="text.secondary">
-                    Ronda {r}
-                  </Typography>
-                  <Stack spacing={1}>
-                    {cruces.map((pelea) => (
-                      <Paper
-                        key={pelea.id}
-                        variant="outlined"
-                        sx={{ p: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}
-                      >
-                        <Avatar src={pelea.boxeadorAFotoUrl ?? undefined} sx={{ width: 32, height: 32 }}>
-                          {pelea.boxeadorANombre.charAt(0)}
-                        </Avatar>
-                        <Typography variant="body2" sx={{ fontWeight: 700, flexGrow: 1 }}>
-                          {pelea.boxeadorANombre}
+          {peleasDelTorneo.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              Todavía no hay cruces pactados para este torneo.
+            </Typography>
+          ) : (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'stretch',
+                gap: 5,
+                overflowX: 'auto',
+                pb: 1,
+              }}
+            >
+              {rondas.map((r) => {
+                const cruces = peleasDelTorneo.filter((p) => p.ronda === r)
+                const esFinal = r === ultimaRonda && rondas.length > 1
+                return (
+                  <Stack key={r} sx={{ minWidth: 220 }}>
+                    <Typography
+                      variant="overline"
+                      color={esFinal ? 'secondary.main' : 'text.secondary'}
+                      sx={{ textAlign: 'center', mb: 2, fontWeight: 700 }}
+                    >
+                      {esFinal ? 'Final' : `Ronda ${r}`}
+                    </Typography>
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        gap: 4,
+                      }}
+                    >
+                      {cruces.length === 0 ? (
+                        <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
+                          Sin cruces todavía
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          vs
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 700, flexGrow: 1, textAlign: 'right' }}>
-                          {pelea.boxeadorBNombre}
-                        </Typography>
-                        <Avatar src={pelea.boxeadorBFotoUrl ?? undefined} sx={{ width: 32, height: 32 }}>
-                          {pelea.boxeadorBNombre.charAt(0)}
-                        </Avatar>
-                        <IconButton
-                          size="small"
-                          disabled={eliminarMutation.isPending}
-                          onClick={() => eliminarMutation.mutate(pelea.id)}
-                          aria-label="Eliminar cruce"
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Paper>
-                    ))}
+                      ) : (
+                        cruces.map((pelea) => (
+                          <MatchCard
+                            key={pelea.id}
+                            pelea={pelea}
+                            puedeEliminar={!eliminarMutation.isPending}
+                            onEliminar={() => eliminarMutation.mutate(pelea.id)}
+                          />
+                        ))
+                      )}
+                    </Box>
                   </Stack>
-                </Stack>
-              )
-            })}
-            {peleasDelTorneo.length === 0 && (
-              <Typography variant="body2" color="text.secondary">
-                Todavía no hay cruces pactados para este torneo.
-              </Typography>
-            )}
-          </Stack>
+                )
+              })}
+            </Box>
+          )}
         </Stack>
       </DialogContent>
     </Dialog>
