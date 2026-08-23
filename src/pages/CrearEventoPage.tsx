@@ -25,6 +25,7 @@ const schema = z.object({
   nombre: z.string().min(1, 'Requerido'),
   tipo: z.enum(['torneo', 'velada', 'exhibicion', 'campeonato']),
   fecha: z.string().min(1, 'Requerido'),
+  hora: z.string().optional(),
   lugar: z.string().optional(),
   regionId: z.string().optional(),
   gimnasioId: z.string().optional(),
@@ -33,6 +34,7 @@ const schema = z.object({
   cuposPorGimnasio: z.string().optional(),
   reglamentoUrl: z.string().optional(),
   afichePosterUrl: z.string().optional(),
+  linkEntradas: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -66,6 +68,7 @@ export function CrearEventoPage() {
         nombre: values.nombre,
         tipo: values.tipo,
         fecha: values.fecha,
+        hora: values.hora || undefined,
         lugar: values.lugar || undefined,
         regionId: values.regionId ? Number(values.regionId) : undefined,
         gimnasioId: values.gimnasioId || undefined,
@@ -74,6 +77,7 @@ export function CrearEventoPage() {
         cuposPorGimnasio: values.cuposPorGimnasio ? Number(values.cuposPorGimnasio) : undefined,
         reglamentoUrl: values.reglamentoUrl || undefined,
         afichePosterUrl: values.afichePosterUrl || undefined,
+        linkEntradas: values.linkEntradas || undefined,
       }),
     onSuccess: (evento) => {
       navigate(`/eventos/${evento.id}`)
@@ -116,7 +120,7 @@ export function CrearEventoPage() {
                   )}
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
+              <Grid size={{ xs: 6, sm: 3 }}>
                 <TextField
                   fullWidth
                   label="Fecha"
@@ -125,6 +129,15 @@ export function CrearEventoPage() {
                   {...register('fecha')}
                   error={!!errors.fecha}
                   helperText={errors.fecha?.message}
+                />
+              </Grid>
+              <Grid size={{ xs: 6, sm: 3 }}>
+                <TextField
+                  fullWidth
+                  label="Hora"
+                  type="time"
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  {...register('hora')}
                 />
               </Grid>
               {gimnasiosQuery.data && gimnasiosQuery.data.length > 1 && (
@@ -206,6 +219,14 @@ export function CrearEventoPage() {
                   label="Cupos por gimnasio (opcional)"
                   type="number"
                   {...register('cuposPorGimnasio')}
+                />
+              </Grid>
+              <Grid size={12}>
+                <TextField
+                  fullWidth
+                  label="Link de entradas (opcional)"
+                  placeholder="https://passline.com/..."
+                  {...register('linkEntradas')}
                 />
               </Grid>
               <Grid size={12}>

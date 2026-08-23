@@ -337,6 +337,7 @@ export interface EventoResponse {
   nombre: string
   tipo: TipoEventoEnum
   fecha: string
+  hora: string | null
   lugar: string | null
   regionId: number | null
   regionNombre: string | null
@@ -346,6 +347,9 @@ export interface EventoResponse {
   estado: EstadoEventoEnum
   afichePosterUrl: string | null
   reglamentoUrl: string | null
+  linkEntradas: string | null
+  carteleraPublicada: boolean
+  inscripcionesCerradas: boolean
   organizadorId: string
   organizadorNombre: string
   gimnasioId: string | null
@@ -356,6 +360,7 @@ export interface EventoCreateRequest {
   nombre: string
   tipo: TipoEventoEnum
   fecha: string
+  hora?: string
   lugar?: string
   regionId?: number
   cuposTotales?: number
@@ -363,17 +368,20 @@ export interface EventoCreateRequest {
   cuposPorGimnasio?: number
   reglamentoUrl?: string
   afichePosterUrl?: string
+  linkEntradas?: string
   gimnasioId?: string
 }
 
 export interface EventoUpdateRequest {
   nombre?: string
   fecha?: string
+  hora?: string
   lugar?: string
   regionId?: number
   cuposTotales?: number
   modalidad?: ModalidadInscripcionEnum
   cuposPorGimnasio?: number
+  linkEntradas?: string
   estado?: EstadoEventoEnum
   reglamentoUrl?: string
   afichePosterUrl?: string
@@ -421,15 +429,22 @@ export interface EventoPeleaResponse {
   boxeadorAId: string
   boxeadorANombre: string
   boxeadorAFotoUrl: string | null
+  gimnasioAId: string | null
+  gimnasioANombre: string | null
   boxeadorBId: string
   boxeadorBNombre: string
   boxeadorBFotoUrl: string | null
+  gimnasioBId: string | null
+  gimnasioBNombre: string | null
   categoriaNombre: string | null
   torneoId: string | null
   torneoNombre: string | null
   ronda: number
   estado: EstadoPeleaEnum
   ganadorId: string | null
+  confirmacionGimnasioA: EstadoSolicitudEnum
+  confirmacionGimnasioB: EstadoSolicitudEnum
+  estadoConfirmacion: EstadoSolicitudEnum
 }
 
 export interface EventoPeleaCreateRequest {
@@ -441,6 +456,21 @@ export interface EventoPeleaCreateRequest {
 
 export interface EventoPeleaResultadoRequest {
   ganadorId: string | null
+}
+
+export interface PeleaConfirmacionRequest {
+  aceptar: boolean
+}
+
+export interface PeleaPendienteResponse {
+  peleaId: string
+  eventoId: string
+  eventoNombre: string
+  boxeadorANombre: string
+  boxeadorAFotoUrl: string | null
+  boxeadorBNombre: string
+  boxeadorBFotoUrl: string | null
+  categoriaNombre: string | null
 }
 
 export interface GimnasioResumenResponse {

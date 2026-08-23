@@ -1,5 +1,6 @@
 import { apiClient } from './client'
 import type {
+  CompatibilidadResponse,
   EventoCreateRequest,
   EventoFiltros,
   EventoInscripcionCreateRequest,
@@ -125,5 +126,38 @@ export async function registrarResultadoPelea(
     `/api/eventos/${eventoId}/peleas/${peleaId}/resultado`,
     request,
   )
+  return data
+}
+
+export async function sugerirRivales(eventoId: string, boxeadorId: string): Promise<CompatibilidadResponse[]> {
+  const { data } = await apiClient.get<CompatibilidadResponse[]>(`/api/eventos/${eventoId}/peleas/sugerencias`, {
+    params: { boxeadorId },
+  })
+  return data
+}
+
+export async function generarAutomatico(eventoId: string, torneoId?: string): Promise<EventoPeleaResponse[]> {
+  const { data } = await apiClient.post<EventoPeleaResponse[]>(
+    `/api/eventos/${eventoId}/peleas/generar-automatico`,
+    null,
+    { params: torneoId ? { torneoId } : undefined },
+  )
+  return data
+}
+
+export async function registrarConfirmacionPelea(
+  eventoId: string,
+  peleaId: string,
+  aceptar: boolean,
+): Promise<EventoPeleaResponse> {
+  const { data } = await apiClient.put<EventoPeleaResponse>(
+    `/api/eventos/${eventoId}/peleas/${peleaId}/confirmacion`,
+    { aceptar },
+  )
+  return data
+}
+
+export async function publicarCartelera(eventoId: string): Promise<EventoResponse> {
+  const { data } = await apiClient.post<EventoResponse>(`/api/eventos/${eventoId}/cartelera/publicar`)
   return data
 }

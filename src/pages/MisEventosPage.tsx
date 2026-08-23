@@ -11,6 +11,7 @@ import { Link as RouterLink } from 'react-router-dom'
 import { misEventos } from '../api/eventos'
 import { EventoCard } from '../features/eventos/components/EventoCard'
 import { InvitacionesRecibidasSection } from '../features/eventos/components/InvitacionesRecibidasSection'
+import { PeleasPendientesSection } from '../features/eventos/components/PeleasPendientesSection'
 
 export function MisEventosPage() {
   const [page, setPage] = useState(0)
@@ -30,6 +31,7 @@ export function MisEventosPage() {
       </Stack>
 
       <InvitacionesRecibidasSection />
+      <PeleasPendientesSection />
 
       {query.isLoading && <CircularProgress />}
       {query.isError && <Typography color="error">No se pudo cargar tus eventos.</Typography>}

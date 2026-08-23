@@ -24,6 +24,7 @@ interface Props {
 export function EditarEventoDialog({ evento, open, onClose }: Props) {
   const [nombre, setNombre] = useState(evento.nombre)
   const [fecha, setFecha] = useState(evento.fecha)
+  const [hora, setHora] = useState(evento.hora ?? '')
   const [lugar, setLugar] = useState(evento.lugar ?? '')
   const [regionId, setRegionId] = useState(evento.regionId?.toString() ?? '')
   const [cuposTotales, setCuposTotales] = useState(evento.cuposTotales?.toString() ?? '')
@@ -32,6 +33,7 @@ export function EditarEventoDialog({ evento, open, onClose }: Props) {
   const [estado, setEstado] = useState<EstadoEventoEnum>(evento.estado)
   const [reglamentoUrl, setReglamentoUrl] = useState(evento.reglamentoUrl ?? '')
   const [afichePosterUrl, setAfichePosterUrl] = useState(evento.afichePosterUrl ?? '')
+  const [linkEntradas, setLinkEntradas] = useState(evento.linkEntradas ?? '')
 
   const queryClient = useQueryClient()
   const regionesQuery = useQuery({ queryKey: ['catalogos', 'regiones'], queryFn: listarRegiones })
@@ -41,6 +43,7 @@ export function EditarEventoDialog({ evento, open, onClose }: Props) {
       actualizar(evento.id, {
         nombre,
         fecha,
+        hora: hora || undefined,
         lugar: lugar || undefined,
         regionId: regionId ? Number(regionId) : undefined,
         cuposTotales: cuposTotales ? Number(cuposTotales) : undefined,
@@ -49,6 +52,7 @@ export function EditarEventoDialog({ evento, open, onClose }: Props) {
         estado,
         reglamentoUrl: reglamentoUrl || undefined,
         afichePosterUrl: afichePosterUrl || undefined,
+        linkEntradas: linkEntradas || undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['evento', evento.id] })
@@ -65,13 +69,23 @@ export function EditarEventoDialog({ evento, open, onClose }: Props) {
           <Grid size={12}>
             <TextField fullWidth label="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <TextField
               fullWidth
               label="Fecha"
               type="date"
               value={fecha}
               onChange={(e) => setFecha(e.target.value)}
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+          </Grid>
+          <Grid size={{ xs: 6, sm: 3 }}>
+            <TextField
+              fullWidth
+              label="Hora"
+              type="time"
+              value={hora}
+              onChange={(e) => setHora(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
             />
           </Grid>
@@ -132,6 +146,15 @@ export function EditarEventoDialog({ evento, open, onClose }: Props) {
               <MenuItem value="finalizado">Finalizado</MenuItem>
               <MenuItem value="cancelado">Cancelado</MenuItem>
             </TextField>
+          </Grid>
+          <Grid size={12}>
+            <TextField
+              fullWidth
+              label="Link de entradas (opcional)"
+              placeholder="https://passline.com/..."
+              value={linkEntradas}
+              onChange={(e) => setLinkEntradas(e.target.value)}
+            />
           </Grid>
           <Grid size={12}>
             <AficheUploadField value={afichePosterUrl} onChange={setAfichePosterUrl} />

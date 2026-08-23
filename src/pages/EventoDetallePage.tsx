@@ -6,10 +6,12 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { obtener } from '../api/eventos'
+import { obtener, publicarCartelera } from '../api/eventos'
 import { useAuth } from '../auth/useAuth'
+import { CarteleraOficialCard } from '../features/eventos/components/CarteleraOficialCard'
+import { CompartirEventoButtons } from '../features/eventos/components/CompartirEventoButtons'
 import { EditarEventoDialog } from '../features/eventos/components/EditarEventoDialog'
 import { EstadoEventoChip } from '../features/eventos/components/EstadoEventoChip'
 import { InscripcionesEventoCard } from '../features/eventos/components/InscripcionesEventoCard'
@@ -27,11 +29,19 @@ export function EventoDetallePage() {
   const { id } = useParams<{ id: string }>()
   const { auth } = useAuth()
   const [editOpen, setEditOpen] = useState(false)
+  const queryClient = useQueryClient()
 
   const query = useQuery({
     queryKey: ['evento', id],
     queryFn: () => obtener(id!),
     enabled: !!id,
+  })
+
+  const publicarMutation = useMutation({
+    mutationFn: () => publicarCartelera(id!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['evento', id] })
+    },
   })
 
   if (!id) return null
@@ -65,8 +75,14 @@ export function EventoDetallePage() {
             {evento.modalidad === 'cerrada' && (
               <Chip size="small" variant="outlined" label="Inscripción cerrada (por invitación)" />
             )}
+            {evento.inscripcionesCerradas && (
+              <Chip size="small" variant="outlined" color="warning" label="Inscripciones cerradas" />
+            )}
           </Stack>
-          <Typography variant="h1">{evento.nombre}</Typography>
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+            <Typography variant="h1">{evento.nombre}</Typography>
+            <CompartirEventoButtons nombre={evento.nombre} />
+          </Stack>
           <Typography variant="body1">
             {new Date(evento.fecha).toLocaleDateString('es-CL', {
               weekday: 'long',
@@ -74,6 +90,7 @@ export function EventoDetallePage() {
               month: 'long',
               day: 'numeric',
             })}
+            {evento.hora && ` · ${evento.hora.slice(0, 5)}`}
           </Typography>
           {evento.lugar && <Typography variant="body1">{evento.lugar}</Typography>}
           {evento.regionNombre && (
@@ -89,18 +106,41 @@ export function EventoDetallePage() {
           <Typography variant="body2" color="text.secondary">
             Organiza: {evento.gimnasioNombre ?? evento.organizadorNombre}
           </Typography>
-          {evento.reglamentoUrl && (
-            <Button href={evento.reglamentoUrl} target="_blank" rel="noopener" variant="outlined" sx={{ alignSelf: 'flex-start' }}>
-              Ver reglamento
-            </Button>
-          )}
-          {esOrganizador && (
-            <Button variant="outlined" onClick={() => setEditOpen(true)} sx={{ alignSelf: 'flex-start' }}>
-              Editar evento
-            </Button>
-          )}
+          <Stack direction="row" spacing={1.5} sx={{ flexWrap: 'wrap' }}>
+            {evento.linkEntradas && (
+              <Button href={evento.linkEntradas} target="_blank" rel="noopener" variant="contained">
+                Comprar entradas
+              </Button>
+            )}
+            {evento.reglamentoUrl && (
+              <Button href={evento.reglamentoUrl} target="_blank" rel="noopener" variant="outlined">
+                Ver reglamento
+              </Button>
+            )}
+            {esOrganizador && (
+              <Button variant="outlined" onClick={() => setEditOpen(true)}>
+                Editar evento
+              </Button>
+            )}
+            {esOrganizador && !evento.carteleraPublicada && (
+              <Button
+                variant="outlined"
+                color="secondary"
+                disabled={publicarMutation.isPending}
+                onClick={() => publicarMutation.mutate()}
+              >
+                {publicarMutation.isPending ? 'Publicando...' : 'Publicar cartelera'}
+              </Button>
+            )}
+          </Stack>
         </Stack>
       </Grid>
+
+      {evento.carteleraPublicada && (
+        <Grid size={12}>
+          <CarteleraOficialCard eventoId={evento.id} />
+        </Grid>
+      )}
 
       {esOrganizador && evento.modalidad === 'cerrada' && (
         <Grid size={12}>

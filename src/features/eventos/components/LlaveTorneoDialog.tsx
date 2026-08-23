@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import AddIcon from '@mui/icons-material/Add'
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import CloseIcon from '@mui/icons-material/Close'
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
 import Alert from '@mui/material/Alert'
@@ -7,6 +8,7 @@ import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import ButtonBase from '@mui/material/ButtonBase'
+import Chip from '@mui/material/Chip'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
@@ -21,8 +23,33 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { extraerMensajeError } from '../../../api/errors'
-import { eliminarPelea, listarPeleas, pactarPelea, registrarResultadoPelea } from '../../../api/eventos'
-import type { EventoInscripcionResponse, EventoPeleaResponse, EventoTorneoResponse } from '../../../api/types'
+import {
+  eliminarPelea,
+  generarAutomatico,
+  listarPeleas,
+  pactarPelea,
+  registrarResultadoPelea,
+} from '../../../api/eventos'
+import type {
+  EstadoSolicitudEnum,
+  EventoInscripcionResponse,
+  EventoPeleaResponse,
+  EventoTorneoResponse,
+} from '../../../api/types'
+
+const CONFIRMACION_LABEL: Record<EstadoSolicitudEnum, string> = {
+  pendiente: 'Confirmación pendiente',
+  aceptada: 'Confirmada',
+  rechazada: 'Rechazada',
+  cancelada: 'Cancelada',
+}
+
+const CONFIRMACION_COLOR: Record<EstadoSolicitudEnum, 'warning' | 'success' | 'error' | 'default'> = {
+  pendiente: 'warning',
+  aceptada: 'success',
+  rechazada: 'error',
+  cancelada: 'default',
+}
 
 interface Props {
   eventoId: string
@@ -136,6 +163,15 @@ function MatchCard({
         disabled={actualizandoResultado}
         onClick={manejarClick}
       />
+      <Box sx={{ px: 1.25, pb: 1 }}>
+        <Chip
+          size="small"
+          variant="outlined"
+          label={CONFIRMACION_LABEL[pelea.estadoConfirmacion]}
+          color={CONFIRMACION_COLOR[pelea.estadoConfirmacion]}
+          sx={{ height: 20, fontSize: '0.65rem' }}
+        />
+      </Box>
       {puedeEliminar && (
         <IconButton
           className="eliminar-cruce"
@@ -199,6 +235,17 @@ export function LlaveTorneoDialog({ eventoId, torneo, inscritosDelTorneo, open, 
     },
   })
 
+  const automaticoMutation = useMutation({
+    mutationFn: () => generarAutomatico(eventoId, torneo.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['eventos', eventoId, 'peleas'] })
+    },
+  })
+
+  const inscritosSinPareja = inscritosDelTorneo.filter(
+    (i) => !peleasDelTorneo.some((p) => p.boxeadorAId === i.boxeadorId || p.boxeadorBId === i.boxeadorId),
+  )
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -261,17 +308,32 @@ export function LlaveTorneoDialog({ eventoId, torneo, inscritosDelTorneo, open, 
                 </TextField>
               </Grid>
             </Grid>
-            <Button
-              variant="outlined"
-              startIcon={<AddIcon />}
-              disabled={!aId || !bId || aId === bId || pactarMutation.isPending}
-              onClick={() => pactarMutation.mutate()}
-              sx={{ alignSelf: 'flex-start' }}
-            >
-              {pactarMutation.isPending ? 'Agregando...' : 'Agregar cruce'}
-            </Button>
+            <Stack direction="row" spacing={1.5} sx={{ flexWrap: 'wrap' }}>
+              <Button
+                variant="outlined"
+                startIcon={<AddIcon />}
+                disabled={!aId || !bId || aId === bId || pactarMutation.isPending}
+                onClick={() => pactarMutation.mutate()}
+              >
+                {pactarMutation.isPending ? 'Agregando...' : 'Agregar cruce'}
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                startIcon={<AutoAwesomeIcon />}
+                disabled={inscritosSinPareja.length < 2 || automaticoMutation.isPending}
+                onClick={() => automaticoMutation.mutate()}
+              >
+                {automaticoMutation.isPending ? 'Generando...' : 'Generar cruces automáticos'}
+              </Button>
+            </Stack>
             {pactarMutation.isError && (
               <Alert severity="error">{extraerMensajeError(pactarMutation.error, 'No se pudo agregar el cruce.')}</Alert>
+            )}
+            {automaticoMutation.isError && (
+              <Alert severity="error">
+                {extraerMensajeError(automaticoMutation.error, 'No se pudieron generar los cruces automáticos.')}
+              </Alert>
             )}
           </Stack>
 

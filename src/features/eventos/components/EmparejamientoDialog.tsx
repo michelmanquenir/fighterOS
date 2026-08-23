@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import HandshakeIcon from '@mui/icons-material/Handshake'
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import Alert from '@mui/material/Alert'
+import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -10,6 +12,10 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Grid from '@mui/material/Grid'
 import LinearProgress from '@mui/material/LinearProgress'
+import List from '@mui/material/List'
+import ListItemButton from '@mui/material/ListItemButton'
+import ListItemAvatar from '@mui/material/ListItemAvatar'
+import ListItemText from '@mui/material/ListItemText'
 import MenuItem from '@mui/material/MenuItem'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
@@ -17,7 +23,7 @@ import Typography from '@mui/material/Typography'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { comparar } from '../../../api/boxeadores'
 import { extraerMensajeError } from '../../../api/errors'
-import { pactarPelea } from '../../../api/eventos'
+import { pactarPelea, sugerirRivales } from '../../../api/eventos'
 import type { EventoInscripcionResponse, NivelProgresionEnum } from '../../../api/types'
 
 const NIVEL_LABEL: Record<NivelProgresionEnum, string> = {
@@ -72,6 +78,12 @@ export function EmparejamientoDialog({ eventoId, inscritos, open, onClose }: Pro
   })
 
   const resultado = aId && bId && aId !== bId ? query.data : undefined
+
+  const sugerenciasQuery = useQuery({
+    queryKey: ['eventos', eventoId, 'peleas', 'sugerencias', aId],
+    queryFn: () => sugerirRivales(eventoId, aId),
+    enabled: open && !!aId && !bId,
+  })
 
   const inscripcionA = inscritos.find((i) => i.boxeadorId === aId)
   const inscripcionB = inscritos.find((i) => i.boxeadorId === bId)
@@ -136,6 +148,49 @@ export function EmparejamientoDialog({ eventoId, inscritos, open, onClose }: Pro
               </TextField>
             </Grid>
           </Grid>
+
+          {aId && !bId && (
+            <Stack spacing={1}>
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                <AutoAwesomeIcon fontSize="small" color="secondary" />
+                <Typography variant="subtitle2">Rivales sugeridos</Typography>
+              </Stack>
+              {sugerenciasQuery.isLoading && (
+                <Box sx={{ textAlign: 'center', py: 1 }}>
+                  <CircularProgress size={20} />
+                </Box>
+              )}
+              {sugerenciasQuery.data && sugerenciasQuery.data.length === 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  No hay otros peleadores disponibles para sugerir.
+                </Typography>
+              )}
+              {sugerenciasQuery.data && sugerenciasQuery.data.length > 0 && (
+                <List disablePadding>
+                  {sugerenciasQuery.data.map((sugerencia) => (
+                    <ListItemButton
+                      key={sugerencia.boxeadorBId}
+                      divider
+                      sx={{ px: 1, borderRadius: 1 }}
+                      onClick={() => setBId(sugerencia.boxeadorBId)}
+                    >
+                      <ListItemAvatar>
+                        <Avatar sx={{ width: 32, height: 32 }}>{sugerencia.boxeadorBNombre.charAt(0)}</Avatar>
+                      </ListItemAvatar>
+                      <ListItemText primary={sugerencia.boxeadorBNombre} />
+                      <Typography
+                        variant="body2"
+                        color={`${colorPuntaje(sugerencia.puntajeGeneral)}.main`}
+                        sx={{ fontWeight: 700 }}
+                      >
+                        {sugerencia.puntajeGeneral}%
+                      </Typography>
+                    </ListItemButton>
+                  ))}
+                </List>
+              )}
+            </Stack>
+          )}
 
           {aId && bId && aId !== bId && query.isLoading && (
             <Box sx={{ textAlign: 'center', py: 2 }}>
