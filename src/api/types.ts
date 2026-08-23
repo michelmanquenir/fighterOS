@@ -328,6 +328,10 @@ export interface Page<T> {
 // Eventos
 // ---------------------------------------------------------------------
 
+export type ModalidadInscripcionEnum = 'abierta' | 'cerrada'
+
+export type EstadoSolicitudEnum = 'pendiente' | 'aceptada' | 'rechazada' | 'cancelada'
+
 export interface EventoResponse {
   id: string
   nombre: string
@@ -337,6 +341,8 @@ export interface EventoResponse {
   regionId: number | null
   regionNombre: string | null
   cuposTotales: number | null
+  modalidad: ModalidadInscripcionEnum
+  cuposPorGimnasio: number | null
   estado: EstadoEventoEnum
   afichePosterUrl: string | null
   reglamentoUrl: string | null
@@ -353,6 +359,8 @@ export interface EventoCreateRequest {
   lugar?: string
   regionId?: number
   cuposTotales?: number
+  modalidad?: ModalidadInscripcionEnum
+  cuposPorGimnasio?: number
   reglamentoUrl?: string
   afichePosterUrl?: string
   gimnasioId?: string
@@ -364,6 +372,8 @@ export interface EventoUpdateRequest {
   lugar?: string
   regionId?: number
   cuposTotales?: number
+  modalidad?: ModalidadInscripcionEnum
+  cuposPorGimnasio?: number
   estado?: EstadoEventoEnum
   reglamentoUrl?: string
   afichePosterUrl?: string
@@ -431,4 +441,28 @@ export interface EventoPeleaCreateRequest {
 
 export interface EventoPeleaResultadoRequest {
   ganadorId: string | null
+}
+
+export interface GimnasioResumenResponse {
+  id: string
+  nombre: string
+  regionNombre: string | null
+}
+
+export interface InvitacionResponse {
+  id: string
+  eventoId: string
+  eventoNombre: string
+  gimnasioId: string
+  gimnasioNombre: string
+  estado: EstadoSolicitudEnum
+  fecha: string
+}
+
+export interface InvitacionCreateRequest {
+  gimnasioId: string
+}
+
+export interface InvitacionResponderRequest {
+  aceptar: boolean
 }

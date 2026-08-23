@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { actualizar } from '../../../api/eventos'
 import { listarRegiones } from '../../../api/catalogos'
-import type { EstadoEventoEnum, EventoResponse } from '../../../api/types'
+import type { EstadoEventoEnum, EventoResponse, ModalidadInscripcionEnum } from '../../../api/types'
 import { AficheUploadField } from './AficheUploadField'
 import { ReglamentoUploadField } from './ReglamentoUploadField'
 
@@ -27,6 +27,8 @@ export function EditarEventoDialog({ evento, open, onClose }: Props) {
   const [lugar, setLugar] = useState(evento.lugar ?? '')
   const [regionId, setRegionId] = useState(evento.regionId?.toString() ?? '')
   const [cuposTotales, setCuposTotales] = useState(evento.cuposTotales?.toString() ?? '')
+  const [modalidad, setModalidad] = useState<ModalidadInscripcionEnum>(evento.modalidad)
+  const [cuposPorGimnasio, setCuposPorGimnasio] = useState(evento.cuposPorGimnasio?.toString() ?? '')
   const [estado, setEstado] = useState<EstadoEventoEnum>(evento.estado)
   const [reglamentoUrl, setReglamentoUrl] = useState(evento.reglamentoUrl ?? '')
   const [afichePosterUrl, setAfichePosterUrl] = useState(evento.afichePosterUrl ?? '')
@@ -42,6 +44,8 @@ export function EditarEventoDialog({ evento, open, onClose }: Props) {
         lugar: lugar || undefined,
         regionId: regionId ? Number(regionId) : undefined,
         cuposTotales: cuposTotales ? Number(cuposTotales) : undefined,
+        modalidad,
+        cuposPorGimnasio: cuposPorGimnasio ? Number(cuposPorGimnasio) : undefined,
         estado,
         reglamentoUrl: reglamentoUrl || undefined,
         afichePosterUrl: afichePosterUrl || undefined,
@@ -91,6 +95,27 @@ export function EditarEventoDialog({ evento, open, onClose }: Props) {
               type="number"
               value={cuposTotales}
               onChange={(e) => setCuposTotales(e.target.value)}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              select
+              fullWidth
+              label="Modalidad de inscripción"
+              value={modalidad}
+              onChange={(e) => setModalidad(e.target.value as ModalidadInscripcionEnum)}
+            >
+              <MenuItem value="abierta">Abierta</MenuItem>
+              <MenuItem value="cerrada">Cerrada (por invitación)</MenuItem>
+            </TextField>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              fullWidth
+              label="Cupos por gimnasio (opcional)"
+              type="number"
+              value={cuposPorGimnasio}
+              onChange={(e) => setCuposPorGimnasio(e.target.value)}
             />
           </Grid>
           <Grid size={12}>

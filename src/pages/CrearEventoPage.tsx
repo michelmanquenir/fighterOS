@@ -29,6 +29,8 @@ const schema = z.object({
   regionId: z.string().optional(),
   gimnasioId: z.string().optional(),
   cuposTotales: z.string().optional(),
+  modalidad: z.enum(['abierta', 'cerrada']),
+  cuposPorGimnasio: z.string().optional(),
   reglamentoUrl: z.string().optional(),
   afichePosterUrl: z.string().optional(),
 })
@@ -49,7 +51,7 @@ export function CrearEventoPage() {
     formState: { errors, isSubmitted },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { tipo: 'velada', regionId: '', gimnasioId: '' },
+    defaultValues: { tipo: 'velada', regionId: '', gimnasioId: '', modalidad: 'abierta' },
   })
 
   useEffect(() => {
@@ -68,6 +70,8 @@ export function CrearEventoPage() {
         regionId: values.regionId ? Number(values.regionId) : undefined,
         gimnasioId: values.gimnasioId || undefined,
         cuposTotales: values.cuposTotales ? Number(values.cuposTotales) : undefined,
+        modalidad: values.modalidad,
+        cuposPorGimnasio: values.cuposPorGimnasio ? Number(values.cuposPorGimnasio) : undefined,
         reglamentoUrl: values.reglamentoUrl || undefined,
         afichePosterUrl: values.afichePosterUrl || undefined,
       }),
@@ -172,6 +176,36 @@ export function CrearEventoPage() {
                   label="Cupos totales"
                   type="number"
                   {...register('cuposTotales')}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Controller
+                  name="modalidad"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      select
+                      fullWidth
+                      label="Modalidad de inscripción"
+                      helperText={
+                        field.value === 'cerrada'
+                          ? 'Solo los gimnasios que invites podrán inscribir peleadores'
+                          : 'Cualquier gimnasio puede inscribir peleadores'
+                      }
+                      {...field}
+                    >
+                      <MenuItem value="abierta">Abierta</MenuItem>
+                      <MenuItem value="cerrada">Cerrada (por invitación)</MenuItem>
+                    </TextField>
+                  )}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  label="Cupos por gimnasio (opcional)"
+                  type="number"
+                  {...register('cuposPorGimnasio')}
                 />
               </Grid>
               <Grid size={12}>

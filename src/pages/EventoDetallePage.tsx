@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
@@ -12,6 +13,7 @@ import { useAuth } from '../auth/useAuth'
 import { EditarEventoDialog } from '../features/eventos/components/EditarEventoDialog'
 import { EstadoEventoChip } from '../features/eventos/components/EstadoEventoChip'
 import { InscripcionesEventoCard } from '../features/eventos/components/InscripcionesEventoCard'
+import { InvitacionesEventoCard } from '../features/eventos/components/InvitacionesEventoCard'
 import { TorneosEventoCard } from '../features/eventos/components/TorneosEventoCard'
 
 const TIPO_LABEL: Record<string, string> = {
@@ -60,6 +62,9 @@ export function EventoDetallePage() {
             <Typography variant="body2" color="text.secondary">
               {TIPO_LABEL[evento.tipo] ?? evento.tipo}
             </Typography>
+            {evento.modalidad === 'cerrada' && (
+              <Chip size="small" variant="outlined" label="Inscripción cerrada (por invitación)" />
+            )}
           </Stack>
           <Typography variant="h1">{evento.nombre}</Typography>
           <Typography variant="body1">
@@ -96,6 +101,12 @@ export function EventoDetallePage() {
           )}
         </Stack>
       </Grid>
+
+      {esOrganizador && evento.modalidad === 'cerrada' && (
+        <Grid size={12}>
+          <InvitacionesEventoCard eventoId={evento.id} />
+        </Grid>
+      )}
 
       {esOrganizador && (
         <Grid size={12}>

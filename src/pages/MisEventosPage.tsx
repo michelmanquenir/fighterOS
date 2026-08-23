@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link as RouterLink } from 'react-router-dom'
 import { misEventos } from '../api/eventos'
 import { EventoCard } from '../features/eventos/components/EventoCard'
+import { InvitacionesRecibidasSection } from '../features/eventos/components/InvitacionesRecibidasSection'
 
 export function MisEventosPage() {
   const [page, setPage] = useState(0)
@@ -27,6 +28,8 @@ export function MisEventosPage() {
           Crear evento
         </Button>
       </Stack>
+
+      <InvitacionesRecibidasSection />
 
       {query.isLoading && <CircularProgress />}
       {query.isError && <Typography color="error">No se pudo cargar tus eventos.</Typography>}
