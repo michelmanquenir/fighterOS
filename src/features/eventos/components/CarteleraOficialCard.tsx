@@ -58,9 +58,6 @@ export function CarteleraOficialCard({ eventoId }: { eventoId: string }) {
   })
 
   const confirmadas = (query.data ?? []).filter((p) => p.estadoConfirmacion === 'aceptada')
-  if (confirmadas.length === 0) {
-    return null
-  }
 
   return (
     <Card>
@@ -69,11 +66,19 @@ export function CarteleraOficialCard({ eventoId }: { eventoId: string }) {
           <EmojiEventsIcon color="secondary" />
           <Typography variant="h5">Cartelera oficial</Typography>
         </Stack>
-        <Stack spacing={1.5}>
-          {confirmadas.map((pelea, index) => (
-            <CarteleraFila key={pelea.id} pelea={pelea} numero={index + 1} />
-          ))}
-        </Stack>
+        {confirmadas.length === 0 ? (
+          <Typography variant="body2" color="text.secondary">
+            La cartelera está publicada, pero todavía ninguna pelea tiene la confirmación de{' '}
+            <strong>ambos</strong> gimnasios. En cuanto una pelea quede confirmada por los dos lados, aparecerá
+            aquí automáticamente.
+          </Typography>
+        ) : (
+          <Stack spacing={1.5}>
+            {confirmadas.map((pelea, index) => (
+              <CarteleraFila key={pelea.id} pelea={pelea} numero={index + 1} />
+            ))}
+          </Stack>
+        )}
       </CardContent>
     </Card>
   )
