@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1'
+import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import PlaceIcon from '@mui/icons-material/Place'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -17,9 +18,11 @@ import { quitarAlumno } from '../../../api/gimnasios'
 import type { GimnasioMioResponse } from '../../../api/types'
 import { BoxeadorCard } from '../../boxeadores/components/BoxeadorCard'
 import { AgregarAlumnoDialog } from './AgregarAlumnoDialog'
+import { CrearAlumnoDialog } from './CrearAlumnoDialog'
 
 export function GimnasioRosterCard({ gimnasio }: { gimnasio: GimnasioMioResponse }) {
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [crearDialogOpen, setCrearDialogOpen] = useState(false)
   const queryClient = useQueryClient()
 
   const rosterQuery = useQuery({
@@ -51,9 +54,14 @@ export function GimnasioRosterCard({ gimnasio }: { gimnasio: GimnasioMioResponse
               </Stack>
             )}
           </Stack>
-          <Button size="small" variant="outlined" startIcon={<PersonAddAlt1Icon />} onClick={() => setDialogOpen(true)}>
-            Agregar alumno
-          </Button>
+          <Stack direction="row" spacing={1}>
+            <Button size="small" variant="outlined" startIcon={<PersonAddAlt1Icon />} onClick={() => setDialogOpen(true)}>
+              Agregar existente
+            </Button>
+            <Button size="small" variant="contained" startIcon={<PersonAddIcon />} onClick={() => setCrearDialogOpen(true)}>
+              Crear alumno
+            </Button>
+          </Stack>
         </Stack>
 
         {rosterQuery.isLoading && <CircularProgress size={24} />}
@@ -98,6 +106,7 @@ export function GimnasioRosterCard({ gimnasio }: { gimnasio: GimnasioMioResponse
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
       />
+      <CrearAlumnoDialog gimnasioId={gimnasio.id} open={crearDialogOpen} onClose={() => setCrearDialogOpen(false)} />
     </Card>
   )
 }

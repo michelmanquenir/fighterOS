@@ -129,6 +129,25 @@ export interface GimnasioMioResponse {
   roles: string[]
 }
 
+export interface CrearAlumnoRequest {
+  nombre: string
+  email: string
+  password: string
+  rut: string
+  fechaNacimiento: string
+  sexo: SexoEnum
+  pesoActual?: number
+  pesoHabitual?: number
+  categoriaId?: string
+  regionId?: number
+}
+
+export interface AlumnoCreadoResponse {
+  id: string
+  nombre: string
+  email: string
+}
+
 export interface AuthResponse {
   token: string
   usuarioId: string

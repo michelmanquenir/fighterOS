@@ -1,5 +1,11 @@
 import { apiClient } from './client'
-import type { GimnasioCreateRequest, GimnasioMioResponse, GimnasioResumenResponse } from './types'
+import type {
+  AlumnoCreadoResponse,
+  CrearAlumnoRequest,
+  GimnasioCreateRequest,
+  GimnasioMioResponse,
+  GimnasioResumenResponse,
+} from './types'
 
 export async function crearGimnasio(request: GimnasioCreateRequest): Promise<GimnasioMioResponse> {
   const { data } = await apiClient.post<GimnasioMioResponse>('/api/gimnasios', request)
@@ -22,4 +28,12 @@ export async function agregarAlumno(gimnasioId: string, boxeadorId: string): Pro
 
 export async function quitarAlumno(gimnasioId: string, boxeadorId: string): Promise<void> {
   await apiClient.delete(`/api/gimnasios/${gimnasioId}/alumnos/${boxeadorId}`)
+}
+
+export async function crearAlumno(
+  gimnasioId: string,
+  request: CrearAlumnoRequest,
+): Promise<AlumnoCreadoResponse> {
+  const { data } = await apiClient.post<AlumnoCreadoResponse>(`/api/gimnasios/${gimnasioId}/alumnos/nuevos`, request)
+  return data
 }
