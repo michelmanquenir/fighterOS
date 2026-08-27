@@ -46,9 +46,14 @@ export function MiGimnasioCard() {
               )}
             </Stack>
           ))}
-          <Button component={RouterLink} to="/eventos/mios" variant="outlined" size="small" sx={{ alignSelf: 'flex-start' }}>
-            Ver mis eventos
-          </Button>
+          <Stack direction="row" spacing={1}>
+            <Button component={RouterLink} to="/gimnasios/mios" variant="outlined" size="small">
+              Ver mis gimnasios
+            </Button>
+            <Button component={RouterLink} to="/eventos/mios" variant="outlined" size="small">
+              Ver mis eventos
+            </Button>
+          </Stack>
         </Stack>
       </CardContent>
     </Card>

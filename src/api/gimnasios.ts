@@ -15,3 +15,11 @@ export async function buscarGimnasios(q: string): Promise<GimnasioResumenRespons
   const { data } = await apiClient.get<GimnasioResumenResponse[]>('/api/gimnasios', { params: { q } })
   return data
 }
+
+export async function agregarAlumno(gimnasioId: string, boxeadorId: string): Promise<void> {
+  await apiClient.post(`/api/gimnasios/${gimnasioId}/alumnos`, { boxeadorId })
+}
+
+export async function quitarAlumno(gimnasioId: string, boxeadorId: string): Promise<void> {
+  await apiClient.delete(`/api/gimnasios/${gimnasioId}/alumnos/${boxeadorId}`)
+}

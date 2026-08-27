@@ -9,6 +9,7 @@ import { EventosListPage } from './pages/EventosListPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { MisEventosPage } from './pages/MisEventosPage'
+import { MisGimnasiosPage } from './pages/MisGimnasiosPage'
 import { RegistroEspectadorPage } from './pages/RegistroEspectadorPage'
 import { RegistroBoxeadorPage } from './pages/RegistroBoxeadorPage'
 import { RegistroGimnasioPage } from './pages/RegistroGimnasioPage'
@@ -29,6 +30,7 @@ function App() {
         <Route path="/boxeadores/:id" element={<BoxeadorPerfilPage />} />
         <Route path="/eventos/mios" element={<MisEventosPage />} />
         <Route path="/gimnasios/crear" element={<CrearGimnasioPage />} />
+        <Route path="/gimnasios/mios" element={<MisGimnasiosPage />} />
         <Route path="/eventos/crear" element={<CrearEventoPage />} />
         <Route path="/eventos/:id" element={<EventoDetallePage />} />
       </Route>

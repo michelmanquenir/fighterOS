@@ -104,6 +104,11 @@ export function Header() {
                 Mis eventos
               </Button>
             )}
+            {hasRole(auth, 'gimnasio_admin') && (
+              <Button component={RouterLink} to="/gimnasios/mios" color="inherit">
+                Mis gimnasios
+              </Button>
+            )}
           </Stack>
 
           <Box sx={{ flexGrow: { xs: 1, sm: 0 } }} />
@@ -181,6 +186,11 @@ export function Header() {
           {hasRole(auth, 'gimnasio_admin') && (
             <Button onClick={() => handleNavigate('/eventos/mios')} color="inherit" sx={{ justifyContent: 'flex-start' }}>
               Mis eventos
+            </Button>
+          )}
+          {hasRole(auth, 'gimnasio_admin') && (
+            <Button onClick={() => handleNavigate('/gimnasios/mios')} color="inherit" sx={{ justifyContent: 'flex-start' }}>
+              Mis gimnasios
             </Button>
           )}
 
