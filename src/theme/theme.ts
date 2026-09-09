@@ -1,29 +1,29 @@
 import { createTheme, type PaletteMode } from '@mui/material/styles'
 
-// Dark & Editorial: cartel de pelea, no dashboard SaaS.
-// Acento rojo sangre, tipografía condensada en mayúsculas para
-// títulos, esquinas rectas, sin sombras Material por defecto.
-// El modo claro mantiene el mismo carácter con una paleta tipo
-// papel de diario en vez de invertir colores sin más.
+// FIGHTEROS: rojo / negro / blanco, alto contraste, sin dorado.
+// Tipografía condensada en mayúsculas para títulos, esquinas rectas,
+// sin sombras Material por defecto. El modo claro usa blanco real
+// (no papel crema) y el modo oscuro usa negro real, tal como en la
+// referencia de marca.
 
 const palettes = {
   dark: {
-    background: '#0B0B0D',
-    paper: '#16161A',
-    border: '#26262B',
-    accent: '#D62828',
-    gold: '#C9A227',
-    textPrimary: '#F5F5F5',
-    textSecondary: '#A1A1AA',
+    background: '#0A0A0A',
+    paper: '#141414',
+    border: '#262626',
+    accent: '#E4222D',
+    gold: '#C9CACD',
+    textPrimary: '#FFFFFF',
+    textSecondary: '#A6A6AA',
   },
   light: {
-    background: '#F2F0EA',
+    background: '#FFFFFF',
     paper: '#FFFFFF',
-    border: '#DCD8CE',
-    accent: '#C41E1E',
-    gold: '#9C7A0A',
-    textPrimary: '#1A1A1D',
-    textSecondary: '#5B5B63',
+    border: '#E5E5E5',
+    accent: '#E4222D',
+    gold: '#1A1A1A',
+    textPrimary: '#0D0D0D',
+    textSecondary: '#5C5C5C',
   },
 } as const
 
@@ -43,7 +43,7 @@ export function createAppTheme(mode: PaletteMode) {
       },
       secondary: {
         main: colors.gold,
-        contrastText: mode === 'dark' ? '#0B0B0D' : '#FFFFFF',
+        contrastText: mode === 'dark' ? colors.background : '#FFFFFF',
       },
       error: {
         main: mode === 'dark' ? '#FF5252' : '#C62828',
