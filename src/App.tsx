@@ -10,6 +10,7 @@ import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { MisEventosPage } from './pages/MisEventosPage'
 import { MisGimnasiosPage } from './pages/MisGimnasiosPage'
+import { ProximamentePage } from './pages/ProximamentePage'
 import { RegistroEspectadorPage } from './pages/RegistroEspectadorPage'
 import { RegistroBoxeadorPage } from './pages/RegistroBoxeadorPage'
 import { RegistroGimnasioPage } from './pages/RegistroGimnasioPage'
@@ -33,6 +34,10 @@ function App() {
         <Route path="/gimnasios/mios" element={<MisGimnasiosPage />} />
         <Route path="/eventos/crear" element={<CrearEventoPage />} />
         <Route path="/eventos/:id" element={<EventoDetallePage />} />
+        <Route path="/rankings" element={<ProximamentePage titulo="Rankings" />} />
+        <Route path="/clubes" element={<ProximamentePage titulo="Clubes" />} />
+        <Route path="/entrenadores" element={<ProximamentePage titulo="Entrenadores" />} />
+        <Route path="/contenido-destacado" element={<ProximamentePage titulo="Contenido Destacado" />} />
       </Route>
     </Routes>
   )
