@@ -27,8 +27,7 @@ export function HeroSection() {
         overflow: 'hidden',
         borderBottom: '1px solid',
         borderColor: 'divider',
-        background: (theme) =>
-          `radial-gradient(circle at 82% 25%, rgba(214,40,40,0.22), transparent 55%), radial-gradient(circle at 15% 85%, rgba(201,162,39,0.10), transparent 45%), ${theme.palette.background.default}`,
+        bgcolor: 'background.default',
       }}
     >
       <Container maxWidth="lg" sx={{ py: { xs: 8, md: 12 } }}>
@@ -96,10 +95,7 @@ export function HeroSection() {
                 borderRadius: 1,
                 border: '1px solid',
                 borderColor: 'divider',
-                background: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'linear-gradient(155deg, #1a1a1f 0%, #0B0B0D 55%, #1c0f0f 100%)'
-                    : `linear-gradient(155deg, ${theme.palette.grey[100]} 0%, ${theme.palette.background.paper} 55%, #FBEAEA 100%)`,
+                bgcolor: 'background.paper',
                 overflow: 'hidden',
                 display: 'flex',
                 alignItems: 'flex-end',
@@ -108,19 +104,11 @@ export function HeroSection() {
               <Box
                 sx={{
                   position: 'absolute',
-                  inset: 0,
-                  backgroundImage:
-                    'repeating-linear-gradient(115deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 10px)',
-                }}
-              />
-              <Box
-                sx={{
-                  position: 'absolute',
                   top: 0,
                   right: 0,
-                  bottom: 0,
-                  width: '55%',
-                  background: 'linear-gradient(180deg, rgba(214,40,40,0.35), transparent 70%)',
+                  width: 6,
+                  height: '100%',
+                  bgcolor: 'primary.main',
                 }}
               />
               <ShieldIcon

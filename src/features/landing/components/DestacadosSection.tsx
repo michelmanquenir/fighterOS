@@ -17,10 +17,7 @@ export function DestacadosSection() {
             <Box
               sx={{
                 aspectRatio: '16 / 9',
-                background: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'linear-gradient(135deg, #1a1a1f, #0B0B0D)'
-                    : `linear-gradient(135deg, ${theme.palette.grey[200]}, ${theme.palette.background.paper})`,
+                bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'grey.900' : 'grey.100'),
               }}
             />
             <Stack spacing={2} sx={{ p: 3 }}>
@@ -57,10 +54,7 @@ export function DestacadosSection() {
             <Box
               sx={{
                 aspectRatio: '16 / 9',
-                background: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'linear-gradient(135deg, #1c0f0f, #0B0B0D)'
-                    : `linear-gradient(135deg, #FBEAEA, ${theme.palette.background.paper})`,
+                bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'grey.900' : 'grey.100'),
               }}
             />
             <Stack spacing={2} sx={{ p: 3 }}>

@@ -54,15 +54,12 @@ export function OrganizadorCtaSection() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'linear-gradient(135deg, #1c0f0f, #0B0B0D)'
-                    : `linear-gradient(135deg, #FBEAEA, ${theme.palette.background.default})`,
+                bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'grey.900' : 'grey.100'),
                 border: '1px solid',
                 borderColor: 'divider',
               }}
             >
-              <SportsMmaIcon sx={{ fontSize: 96, color: 'rgba(214,40,40,0.4)' }} />
+              <SportsMmaIcon color="primary" sx={{ fontSize: 96 }} />
             </Box>
           </Grid>
         </Grid>
