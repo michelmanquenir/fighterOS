@@ -4,7 +4,6 @@ import FacebookIcon from '@mui/icons-material/Facebook'
 import InstagramIcon from '@mui/icons-material/Instagram'
 import LightModeIcon from '@mui/icons-material/LightMode'
 import MenuIcon from '@mui/icons-material/Menu'
-import SportsMmaIcon from '@mui/icons-material/SportsMma'
 import XIcon from '@mui/icons-material/X'
 import AppBar from '@mui/material/AppBar'
 import Avatar from '@mui/material/Avatar'
@@ -64,27 +63,27 @@ export function Header() {
     navigate(to)
   }
 
+  // Wordmark: "FIGHTEROS" en itálica condensada con una franja roja
+  // inclinada encima, como en la referencia de marca.
   const logo = (
     <Stack
       component={RouterLink}
       to="/"
-      direction="row"
-      spacing={1}
+      spacing={0.25}
       sx={{ alignItems: 'center', textDecoration: 'none', color: 'text.primary' }}
     >
-      <SportsMmaIcon color="primary" sx={{ fontSize: 30 }} />
-      <Stack spacing={0}>
-        <Typography variant="h5" sx={{ lineHeight: 1 }}>
-          Fighteros
-        </Typography>
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ display: { xs: 'none', md: 'block' }, letterSpacing: '0.08em', fontSize: '0.6rem' }}
-        >
-          Tu comunidad. Tu historia. Tu legado.
-        </Typography>
-      </Stack>
+      <Box sx={{ width: '100%', height: 4, bgcolor: 'primary.main', transform: 'skewX(-30deg)' }} />
+      <Typography
+        sx={{
+          fontFamily: '"Bebas Neue", sans-serif',
+          fontSize: { xs: '1.9rem', md: '2.4rem' },
+          lineHeight: 0.9,
+          letterSpacing: '0.04em',
+          transform: 'skewX(-12deg)',
+        }}
+      >
+        Fighteros
+      </Typography>
     </Stack>
   )
 
@@ -111,7 +110,7 @@ export function Header() {
             sx={{ flex: 1, display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}
           >
             {NAV_LINKS.map((link) => {
-              const active = location.pathname === link.to
+              const active = location.pathname === link.to || location.pathname.startsWith(`${link.to}/`)
               return (
                 <Button
                   key={link.to}
@@ -122,6 +121,10 @@ export function Header() {
                   sx={{
                     color: active ? 'primary.main' : 'text.primary',
                     fontWeight: 700,
+                    borderRadius: 0,
+                    borderBottom: '3px solid',
+                    borderColor: active ? 'primary.main' : 'transparent',
+                    '&:hover': { color: 'primary.main', bgcolor: 'transparent' },
                   }}
                 >
                   {link.label}
