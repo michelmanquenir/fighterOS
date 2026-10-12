@@ -38,6 +38,10 @@ function App() {
         <Route path="/clubes" element={<ProximamentePage titulo="Clubes" />} />
         <Route path="/entrenadores" element={<ProximamentePage titulo="Entrenadores" />} />
         <Route path="/contenido-destacado" element={<ProximamentePage titulo="Contenido Destacado" />} />
+        <Route path="/contacto" element={<ProximamentePage titulo="Contacto" />} />
+        <Route path="/ayuda" element={<ProximamentePage titulo="Ayuda" />} />
+        <Route path="/terminos" element={<ProximamentePage titulo="Términos de uso" />} />
+        <Route path="/privacidad" element={<ProximamentePage titulo="Privacidad" />} />
       </Route>
     </Routes>
   )

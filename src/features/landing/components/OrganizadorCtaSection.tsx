@@ -1,69 +1,58 @@
-import AddCircleIcon from '@mui/icons-material/AddCircle'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import SportsMmaIcon from '@mui/icons-material/SportsMma'
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import FavoriteIcon from '@mui/icons-material/Favorite'
+import GroupsIcon from '@mui/icons-material/Groups'
+import VisibilityIcon from '@mui/icons-material/Visibility'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Grid from '@mui/material/Grid'
+import Container from '@mui/material/Container'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { Link as RouterLink } from 'react-router-dom'
-import { Section } from './Section'
+import { AccentBar } from './AccentBar'
 
 const PUNTOS = [
-  'Crea y publica tus eventos',
-  'Invita gimnasios y deportistas',
-  'Administra cartelera y resultados',
-  'Gestiona árbitros y sedes',
-  'Lleva tus eventos al siguiente nivel',
+  { icon: VisibilityIcon, label: 'Más visibilidad' },
+  { icon: GroupsIcon, label: 'Comunidad real' },
+  { icon: FavoriteIcon, label: 'Apoyo al boxeo chileno' },
 ]
 
 export function OrganizadorCtaSection() {
   return (
-    <Box sx={{ bgcolor: 'background.paper', borderTop: '1px solid', borderBottom: '1px solid', borderColor: 'divider' }}>
-      <Section sx={{ py: { xs: 6, md: 6 } }}>
-        <Grid container spacing={4} sx={{ alignItems: 'center' }}>
-          <Grid size={{ xs: 12, md: 7 }}>
-            <Stack spacing={2}>
-              <Typography variant="h3">¿Eres organizador?</Typography>
-              <Stack spacing={1}>
-                {PUNTOS.map((p) => (
-                  <Stack key={p} direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                    <CheckCircleIcon color="primary" fontSize="small" />
-                    <Typography variant="body2">{p}</Typography>
-                  </Stack>
-                ))}
+    <Box sx={{ bgcolor: 'grey.900', color: '#FFFFFF' }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 5, md: 6 } }}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={4} sx={{ alignItems: { md: 'center' }, justifyContent: 'space-between' }}>
+          <Stack spacing={1.5} sx={{ flex: 1 }}>
+            <Typography variant="h2">¿Eres organizador?</Typography>
+            <AccentBar />
+            <Typography sx={{ color: 'grey.400', maxWidth: 460 }}>
+              Crea tus eventos en Fighteros y llega a más boxeadores, clubes y fanáticos en Chile.
+            </Typography>
+          </Stack>
+
+          <Stack direction="row" spacing={4} sx={{ flexWrap: 'wrap' }}>
+            {PUNTOS.map(({ icon: Icon, label }) => (
+              <Stack key={label} spacing={1} sx={{ alignItems: 'center', width: 100 }}>
+                <Icon sx={{ fontSize: 32, color: 'primary.main' }} />
+                <Typography variant="caption" sx={{ textAlign: 'center', color: 'grey.300', fontWeight: 700 }}>
+                  {label}
+                </Typography>
               </Stack>
-              <Button
-                component={RouterLink}
-                to="/eventos/crear"
-                variant="contained"
-                color="primary"
-                size="large"
-                startIcon={<AddCircleIcon />}
-                sx={{ alignSelf: 'flex-start' }}
-              >
-                Crear evento
-              </Button>
-            </Stack>
-          </Grid>
-          <Grid size={{ xs: 12, md: 5 }} sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
-            <Box
-              sx={{
-                width: '100%',
-                aspectRatio: '4 / 3',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'grey.900' : 'grey.100'),
-                border: '1px solid',
-                borderColor: 'divider',
-              }}
-            >
-              <SportsMmaIcon color="primary" sx={{ fontSize: 96 }} />
-            </Box>
-          </Grid>
-        </Grid>
-      </Section>
+            ))}
+          </Stack>
+
+          <Button
+            component={RouterLink}
+            to="/eventos/crear"
+            variant="contained"
+            color="primary"
+            size="large"
+            endIcon={<ArrowForwardIcon />}
+            sx={{ flexShrink: 0 }}
+          >
+            Crear evento
+          </Button>
+        </Stack>
+      </Container>
     </Box>
   )
 }

@@ -496,6 +496,7 @@ export interface GimnasioResumenResponse {
   id: string
   nombre: string
   regionNombre: string | null
+  cantidadAlumnos: number
 }
 
 export interface InvitacionResponse {

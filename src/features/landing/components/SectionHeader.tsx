@@ -2,6 +2,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { Link as RouterLink } from 'react-router-dom'
+import { AccentBar } from './AccentBar'
 
 export function SectionHeader({
   title,
@@ -16,18 +17,21 @@ export function SectionHeader({
     <Stack
       direction="row"
       spacing={2}
-      sx={{ justifyContent: 'space-between', alignItems: 'baseline', mb: 3 }}
+      sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
     >
-      <Typography variant="h3">{title}</Typography>
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+        <AccentBar vertical />
+        <Typography variant="h3">{title}</Typography>
+      </Stack>
       {actionLabel && actionTo && (
         <Stack
           component={RouterLink}
           to={actionTo}
           direction="row"
           spacing={0.5}
-          sx={{ alignItems: 'center', textDecoration: 'none', color: 'primary.main', flexShrink: 0 }}
+          sx={{ alignItems: 'center', textDecoration: 'none', color: 'text.primary', flexShrink: 0 }}
         >
-          <Typography variant="button" color="primary" sx={{ fontWeight: 700 }}>
+          <Typography variant="button" sx={{ fontWeight: 700 }}>
             {actionLabel}
           </Typography>
           <ArrowForwardIcon fontSize="small" color="primary" />

@@ -26,6 +26,7 @@ import { useAuth } from '../auth/useAuth'
 import { useColorMode } from '../theme/useColorMode'
 
 const NAV_LINKS = [
+  { to: '/eventos', label: 'Eventos' },
   { to: '/rankings', label: 'Rankings' },
   { to: '/boxeadores', label: 'Peleadores' },
   { to: '/clubes', label: 'Clubes' },

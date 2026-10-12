@@ -22,6 +22,11 @@ export async function buscarGimnasios(q: string): Promise<GimnasioResumenRespons
   return data
 }
 
+export async function obtenerGimnasiosDestacados(): Promise<GimnasioResumenResponse[]> {
+  const { data } = await apiClient.get<GimnasioResumenResponse[]>('/api/gimnasios/destacados')
+  return data
+}
+
 export async function agregarAlumno(gimnasioId: string, boxeadorId: string): Promise<void> {
   await apiClient.post(`/api/gimnasios/${gimnasioId}/alumnos`, { boxeadorId })
 }
